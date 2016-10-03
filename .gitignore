@@ -1,0 +1,5 @@
+node_modules/
+static/
+typings/
+typings.json
+jsconfig.json

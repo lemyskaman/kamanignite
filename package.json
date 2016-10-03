@@ -1,0 +1,43 @@
+{
+  "name": "kamanignite",
+  "version": "0.0.0",
+  "description": "a simple nodejs express structure with some goddies to build backend projects or sigle apis",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lemyskaman/kamanignite.git"
+  },
+  "keywords": [
+    "express",
+    "structure",
+    "server",
+    "lemyskaman"
+  ],
+  "author": "lemys lopez",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/lemyskaman/kamanignite/issues"
+  },
+  "dependencies": {
+    "express": "~4.14.0",
+    "mongoose": "~4.6.2",
+    "underscore": "~1.7.0",
+    "bluebird": "~3.0.0",
+    "util": "~0.10.3",
+    "path": "~0.12.7",
+    "body-parser": "~1.15.2",
+    "bcrypt": "~0.8.7",
+    "basic-auth": "~1.0.4",
+    "socket.io": "~1.4.8",
+    "pug": "~2.0.0-beta4",
+    "morgan": "~1.7.0",
+    "jsonwebtoken": "~7.1.6",
+    "promise-mysql": "~1.3.2",
+    "mysql": "~2.11.1",
+    "knex": "~0.11.10"
+  }
+}
