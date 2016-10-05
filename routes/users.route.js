@@ -2,11 +2,14 @@ var Krouter = require("./../core/krouter");
 var basicAuth = require('basic-auth');
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var Promise = require('bluebird');
+var usersModel = require('../models/users.model');
 
 
 module.exports = new Krouter({
 
-
+    model:{
+        users:usersModel
+    },
     userFields: 'cosilla',
     //retrive users from collection acordign a guess
     getFiltredUsers: function (req, res, next) {

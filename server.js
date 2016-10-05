@@ -26,27 +26,27 @@ app.set('token_secret', 'kamankaman');
 app.use(morgan('dev'));
 
 
-//middlewares
-var middlewares = {};
-
-//models
-var models = {};
-models.users = require('./models/users.model');
-
 
 var routes = {};
 routes.users = require('./routes/users.route.js');
-routes.users.models = models
 
+//front end app should be dwonloaded from server  at /
 app.all('/', function (req, res, next) {
     console.log('main');
+    //retive a posted lang or use default
     var lang=req.body.lang || config.lang
     res.render('main', { lang: lang});
     next(); // pass control to the next handler
 });
+
+//all static files served here for production enviorment
+// ngix is recomendable so do this job
 app.use('/static', express.static('static/'));
+
+
+//routes stablishing
 //app.use('/resoruces', routes.users.getRouter());
-//routers stablishing
+
 
 var server = app.listen(config.port, config.ip, function () {
 
@@ -54,6 +54,8 @@ var server = app.listen(config.port, config.ip, function () {
     console.log('form ' + config.ip + ' on port ' + config.port);
 })
 
+
+//gracefull aplication close thanks to
 // listen for TERM signal .e.g. kill
 process.on('SIGTERM', function(){ kamanUtils.gracefulShutdown(server)});
 
