@@ -6,12 +6,16 @@ html(lang=lang)
     head
         meta(charset='utf-8')
         meta(name='viewport', content='width=device-width, initial-scale=1')
-        //link(rel='stylesheet', type='text/css', href='/static/your/static/css/file')
-        
-
+        link(rel='stylesheet', type='text/css', href='../static/kamanapp/assets/css/bootstrap.css')
+        link(rel='stylesheet', type='text/css', href='../static/kamanapp/assets/css/bootstrap-theme.css')
+        link(rel='stylesheet', type='text/css', href='../static/kamanapp/assets/css/docs.min.css')
+        link(rel='stylesheet', type='text/css', href='../static/kamanapp/assets/css/ie10-viewport-bug-workaround.css')
+        link(rel='stylesheet', type='text/css', href='../static/kamanapp/assets/css/theme.css')
         script(type='application/javascript').
             const LANG = document.documentElement.lang;
             console.log(LANG)
     body(role='document')
         #main
-        //script(src='your static js file ')
+        script(src='../static/kamanapp/assets/js/jquery.js')
+        script(src='../static/kamanapp/assets/js/ie10-viewport-bug-workaround.js')
+        script(src='../static/kamanapp/bundled_app.js')

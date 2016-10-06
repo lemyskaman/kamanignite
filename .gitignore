@@ -1,4 +1,5 @@
 node_modules/
+nodemon.json
 static/
 typings/
 typings.json
