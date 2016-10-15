@@ -34,7 +34,7 @@ routes.users = require('./routes/users.route.js');
 app.all('/', function (req, res, next) {
     console.log('main');
     //retive a posted lang or use default
-    var lang=req.body.lang || config.lang
+    var lang=req.body.lang || config.lang || 'en'
     res.render('main', { lang: lang});
     next(); // pass control to the next handler
 });
