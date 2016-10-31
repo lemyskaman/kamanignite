@@ -30,6 +30,13 @@ module.exports.prototype = {
     },
     run: function (req, res, next) {
         console.log('base run');
+    },
+    setEndPoints: function () {},
+    getRouter:function(){
+        this.setEndPoints();
+        return this.router;
     }
+
+
 }
 

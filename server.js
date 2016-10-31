@@ -26,24 +26,14 @@ app.use(morgan('dev'));
 
 
 var routes = {};
+routes.index = require('./routes/index.route.js');
 routes.users = require('./routes/users.route.js');
 
 
+app.use(routes.index.getRouter());
 
 
-app.all('/', function (req, res, next) {
 
-});
-
-app.get('/lang/:lang', function (req, res, next) {
-    console.log('routed, method get');
-    var lang = req.params.lang;
-    console.log('lang setted to '+lang)
-    res.render('main', {lang: lang});
-    next();
-
-
-})
 
 //front end app should be dwonloaded from server  at /
 /*app.all('/:lang', function (req, res, next) {
@@ -53,6 +43,8 @@ app.get('/lang/:lang', function (req, res, next) {
 //all static files served here for production enviorment
 // ngix is recomendable so do this job
 app.use('/static', express.static('static/'));
+
+
 
 
 //routes stablishing
