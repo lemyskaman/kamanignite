@@ -7,8 +7,8 @@ var usersModel = require('../models/users.model');
 
 module.exports = new Krouter({
 
-    model:{
-        users:usersModel
+    model: {
+        users: usersModel
     },
     userFields: 'cosilla',
     //retrive users from collection acordign a guess
@@ -91,8 +91,8 @@ module.exports = new Krouter({
                     //onsole.log('register User catch error',err)
                     res.status(500).json(err)
                 })
-        }else{
-            res.status(500).json({error:'a get id param and some body values are mandatory'})
+        } else {
+            res.status(500).json({error: 'a get id param and some body values are mandatory'})
         }
 
     },
@@ -103,6 +103,10 @@ module.exports = new Krouter({
 
     },
 
+    getRouter: function () {
+        this.setEndPoints();
+        return this.router;
+    },
 
     setEndPoints: function () {
         _that = this;
@@ -115,7 +119,7 @@ module.exports = new Krouter({
                 _that.getUser(req, res, next);
             });
         this.router.route('/user')
-            .post(function(req,res,next){
+            .post(function (req, res, next) {
                 _that.newUser(req, res, next);
             })
         /*
@@ -131,16 +135,11 @@ module.exports = new Krouter({
 
         this.router.route('/users')
             /*.post(function (req, res, next) {
-                _that.newUser(req, res, next);
-            })*/
-            .get(function(req,res,next){
-                _that.getUsers(req,res,next)
+             _that.newUser(req, res, next);
+             })*/
+            .get(function (req, res, next) {
+                _that.getUsers(req, res, next)
             })
-
-    },
-    getRouter: function () {
-        this.setEndPoints();
-        return this.router;
     }
 
 

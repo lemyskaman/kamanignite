@@ -3,7 +3,7 @@
  */
 
 //we load some goddies
-var kamanUtils  = require('./utils/kaman_utils');
+var kamanUtils = require('./utils/kaman_utils');
 var express = require('express');
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
@@ -11,7 +11,6 @@ var morgan = require('morgan');
 
 var _ = require('underscore');
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
-
 
 
 var config = require('./config');
@@ -26,19 +25,30 @@ app.set('token_secret', 'kamankaman');
 app.use(morgan('dev'));
 
 
-
 var routes = {};
 routes.users = require('./routes/users.route.js');
 
-//front end app should be dwonloaded from server  at /
+
+
+
 app.all('/', function (req, res, next) {
-    console.log('main');
-    //retive a posted lang or use default
-    var lang=req.body.lang || config.lang || 'en'
-    console.log(lang);
-    res.render('main', { lang: lang});
-    next(); // pass control to the next handler
+
 });
+
+app.get('/lang/:lang', function (req, res, next) {
+    console.log('routed, method get');
+    var lang = req.params.lang;
+    console.log('lang setted to '+lang)
+    res.render('main', {lang: lang});
+    next();
+
+
+})
+
+//front end app should be dwonloaded from server  at /
+/*app.all('/:lang', function (req, res, next) {
+
+ });*/
 
 //all static files served here for production enviorment
 // ngix is recomendable so do this job
@@ -58,7 +68,11 @@ var server = app.listen(config.port, config.ip, function () {
 
 //gracefull aplication close thanks to
 // listen for TERM signal .e.g. kill
-process.on('SIGTERM', function(){ kamanUtils.gracefulShutdown(server)});
+process.on('SIGTERM', function () {
+    kamanUtils.gracefulShutdown(server)
+});
 
 // listen for INT signal e.g. Ctrl-C
-process.on('SIGINT',function(){ kamanUtils.gracefulShutdown(server)});
+process.on('SIGINT', function () {
+    kamanUtils.gracefulShutdown(server)
+});
