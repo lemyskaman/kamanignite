@@ -29,9 +29,12 @@ var routes = {};
 routes.index = require('./routes/index.route.js');
 routes.users = require('./routes/users.route.js');
 
-
+//a front end html magic will be builded and deliver from here
 app.use(routes.index.getRouter());
-
+app.use('/resources',routes.users.getRouter());
+//all static files will be served from here
+// for production enviorment ngix is recomendable to do this job
+app.use('/static', express.static('static/'));
 
 
 
@@ -40,9 +43,7 @@ app.use(routes.index.getRouter());
 
  });*/
 
-//all static files served here for production enviorment
-// ngix is recomendable so do this job
-app.use('/static', express.static('static/'));
+
 
 
 

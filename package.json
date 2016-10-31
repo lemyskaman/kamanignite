@@ -23,21 +23,21 @@
     "url": "https://github.com/lemyskaman/kamanignite/issues"
   },
   "dependencies": {
-    "express": "~4.14.0",
-    "mongoose": "~4.6.2",
-    "underscore": "~1.7.0",
-    "bluebird": "~3.0.0",
-    "util": "~0.10.3",
-    "path": "~0.12.7",
-    "body-parser": "~1.15.2",
+    "basic-auth": "^1.0.4",
     "bcrypt": "~0.8.7",
-    "basic-auth": "~1.0.4",
-    "socket.io": "~1.4.8",
-    "pug": "~2.0.0-beta4",
-    "morgan": "~1.7.0",
+    "bluebird": "~3.0.0",
+    "body-parser": "~1.15.2",
+    "express": "~4.14.0",
     "jsonwebtoken": "~7.1.6",
-    "promise-mysql": "~1.3.2",
+    "knex": "~0.11.10",
+    "mongoose": "~4.6.2",
+    "morgan": "~1.7.0",
     "mysql": "~2.11.1",
-    "knex": "~0.11.10"
+    "path": "~0.12.7",
+    "promise-mysql": "~1.3.2",
+    "pug": "~2.0.0-beta4",
+    "socket.io": "~1.4.8",
+    "underscore": "~1.7.0",
+    "util": "~0.10.3"
   }
 }

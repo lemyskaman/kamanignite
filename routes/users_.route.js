@@ -13,7 +13,7 @@ module.exports = new Krouter({
     userFields: 'cosilla',
     //retrive users from collection acordign a guess
     getFiltredUsers: function (req, res, next) {
-        this.model.users
+        _that.models.users
             .find(req.params.guess)
             .then(function (rows) {
                 res.status(200).json(rows);
@@ -24,8 +24,7 @@ module.exports = new Krouter({
             })
     },
     getUsers: function (req, res, next) {
-
-        this.model.users
+        _that.models.users
             .getThem()
             .then(function (rows) {
                 res.status(200).json(rows);
@@ -37,8 +36,7 @@ module.exports = new Krouter({
     },
     //retrive a user from the collection but just one acording a criteria
     getUser: function (req, res, next) {
-
-        this.model.users
+        _that.models.users
             ._getUserById(req.params.id)
             .then(function (rows) {
                 res.status(200).json(rows)
@@ -51,7 +49,7 @@ module.exports = new Krouter({
 
     //neds a data check middleware
     newUser: function (req, res, next) {
-
+        _that = this;
         var user = {
             username: req.body.username,
             first_name: req.body.first_name,
@@ -59,7 +57,7 @@ module.exports = new Krouter({
             password: req.body.password
         };
 
-        this.model.users
+        this.models.users
             .addNewUser(user)
             .then(function (rows) {
                 res.status(200).json(rows)
@@ -85,7 +83,7 @@ module.exports = new Krouter({
             if (req.body.last_name)
                 user.last_name = req.body.last_name;
 
-            this.model.users.updateUser(req.params.id, user)
+            this.models.users.updateUser(req.params.id, user)
                 .then(function (rows) {
                     res.status(200).json(rows)
                 })
@@ -111,7 +109,7 @@ module.exports = new Krouter({
     },
 
     setEndPoints: function () {
-        var _that = this;
+        _that = this;
         this.router.route('/user/:id')
 
             .put(function (req, res, next) {
@@ -139,9 +137,7 @@ module.exports = new Krouter({
             /*.post(function (req, res, next) {
              _that.newUser(req, res, next);
              })*/
-
             .get(function (req, res, next) {
-               _that.get
                 _that.getUsers(req, res, next)
             })
     }
