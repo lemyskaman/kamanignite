@@ -8,7 +8,7 @@ module.exports=function(opt){
     this.kind=opt.kind;
    // this.nature=opt.nature
     //this.model
-    var self=this;
+    const self=this;
     _.map(opt,function(element,key,list){
         self[key]=element;
     },self)

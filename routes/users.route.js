@@ -59,10 +59,15 @@ module.exports = new Krouter({
             password: req.body.password
         };
 
+        console.log(req.body);
+
         this.model.users
             .addNewUser(user)
             .then(function (rows) {
-                res.status(200).json(rows)
+                //at this point we should be able to retrive some fields of the
+                //new user recod but instead we are only getting the id os the new record
+                //
+                res.status(200).json(rows[0])
             })
             .catch(function (err) {
                 //onsole.log('register User catch error',err)
@@ -105,22 +110,21 @@ module.exports = new Krouter({
 
     },
 
-    getRouter: function () {
-        this.setEndPoints();
-        return this.router;
-    },
-
     setEndPoints: function () {
         var _that = this;
-        this.router.route('/user/:id')
 
+        this.router.route('/user/:id')
+            //edit user
             .put(function (req, res, next) {
                 _that.updateUser(req, res, next)
             })
+            //get user by id
             .get(function (req, res, next) {
                 _that.getUser(req, res, next);
             });
+
         this.router.route('/user')
+            //adds a new user
             .post(function (req, res, next) {
                 _that.newUser(req, res, next);
             })
@@ -130,18 +134,14 @@ module.exports = new Krouter({
          _that.getUser(req, res, next);
          });*/
         this.router.route('/users/:guess')
+            //retrive a limited user list based on the guess
             .get(function (req, res, next) {
                 _that.getFiltredUsers(req, res, next);
             });
 
-
-        this.router.route('/users')
-            /*.post(function (req, res, next) {
-             _that.newUser(req, res, next);
-             })*/
-
+        this.router.route('/users') //this route should be avoided
+            //retrive all the system users
             .get(function (req, res, next) {
-               _that.get
                 _that.getUsers(req, res, next)
             })
     }

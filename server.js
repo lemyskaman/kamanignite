@@ -12,7 +12,8 @@ var morgan = require('morgan');
 var _ = require('underscore');
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 
-
+var con= new require('./config/config');
+con.env()
 var config = require('./config');
 var app = express();
 

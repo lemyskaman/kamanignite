@@ -35,13 +35,16 @@ module.exports = new Model({
       return bcrypt.hashAsync(pass, saltrounds)
     },
     addNewUser: function (user) {
-        _that = this;
+        var _that = this;
         if (user.password && user.username) {
             return this._hashPass(user.password)
                 .then(function (pass) {
                     user.password = pass;
                     user.status_id = NEW_USER_STATUS;
                     user.password_status_id = SYSTEM_GENERATED_USER_PASSWORD_STATUS;
+                    //next should return privateFields but is not doing it
+                    //it only returns the new user id  iguess is something related to mysql
+                    //more than knexjs
                     return _that.writer('user').returning(this.privateFields).insert(user);
                 })
 
