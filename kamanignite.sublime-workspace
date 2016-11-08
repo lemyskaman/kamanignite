@@ -1,0 +1,326 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+		{
+			"contents": "/**\n * Created by lemyskaman on 26/06/16.\n */\n\n//we load some goddies\nvar kamanUtils = require('./utils/kaman_utils');\nvar express = require('express');\nvar bodyParser = require('body-parser');\nvar morgan = require('morgan');\n\n\nvar _ = require('underscore');\nvar jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens\n\nvar config = new require('./core/config');\nvar app = express();\n\napp.use(bodyparser.urlencoded({\n\textended: true\n}));\napp.use(bodyParser.json());\napp.set('view engine', 'pug');\napp.set('views', './templates');\napp.set('basePath', __dirname);\napp.set('token_secret', 'kamankaman');\napp.use(morgan('dev'));\n\nvar routes = {};\nroutes.index = require('./routes/index.route.js');\nroutes.users = require('./routes/users.route.js');\n//a front end html magic will be builded and deliver from here\napp.use(routes.index.getRouter());\napp.use('/resources', routes.users.getRouter());\n//all static files will be served from here\n// for production enviorment ngix is recomendable to do this job\napp.use('/static', express.static('static/'));\n\n\n//front end app should be dwonloaded from server  at /\n/*app.all('/:lang', function (req, res, next) {\n\n });*/\n\n//routes stablishing\n//app.use('/resoruces', routes.users.getRouter());\nvar server = app.listen(config.get('port'), config.get('ip'), function() {\n\t\tconsole.log('Express server listening');\n\t\tconsole.log('form ' + config.get('ip') + ' on port ' + config.get('port') + '');\n\t})\n\t//gracefull aplication close thanks to\n\t// listen for TERM signal .e.g. kill\nprocess.on('SIGTERM', function() {\n\tkamanUtils.gracefulShutdown(server);\n});\n// listen for INT signal e.g. Ctrl-C\nprocess.on('SIGINT', function() {\n\tkamanUtils.gracefulShutdown(server);\n});",
+			"file": "server.js",
+			"file_size": 1763,
+			"file_write_time": 131229116781458470,
+			"settings":
+			{
+				"buffer_size": 1724,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "routes/users.route.js",
+			"settings":
+			{
+				"buffer_size": 5095,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "{\n\t\"folders\":\n\t[\n\t\t{\n\t\t\t\"path\": \".\"\n\t\t\t\n\t\t}\n\t]\n}\n",
+			"file": "kamanignite.sublime-project",
+			"file_size": 45,
+			"file_write_time": 131228978446439352,
+			"settings":
+			{
+				"buffer_size": 49,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 192.0,
+		"last_filter": "Package Control: re",
+		"selected_items":
+		[
+			[
+				"Package Control: re",
+				"Package Control: Remove Package"
+			],
+			[
+				"Package Control: intsall",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: remoce",
+				"Package Control: Remove Package"
+			],
+			[
+				"Package Control: ins",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: remo",
+				"Package Control: Remove Package"
+			],
+			[
+				"inspa",
+				"Package Control: Install Package"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 512.0
+	},
+	"console":
+	{
+		"height": 126.0,
+		"history":
+		[
+			"view.run_command(\"jshint\")",
+			"import urllib.request,os,hashlib; h = 'df21e130d211cfc94d9b0905775a7c0f' + '1e3d39e33b79698005270310898eea76'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/lemys/projects/kamanignite",
+		"/home/lemys/projects/kamanignite/routes"
+	],
+	"file_history":
+	[
+		"/home/lemys/projects/kamanignite/.gitignore",
+		"/home/lemys/.config/sublime-text-3/Packages/tern_for_sublime/Default.sublime-keymap",
+		"/home/lemys/.config/sublime-text-3/Packages/JsFormat/Default (Linux).sublime-keymap",
+		"/home/lemys/.config/sublime-text-3/Packages/TernJS/TernJS.sublime-settings",
+		"/home/lemys/.config/sublime-text-3/Packages/SublimeLinter/Default (Linux).sublime-keymap"
+	],
+	"find":
+	{
+		"height": 23.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "server.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1724,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								380,
+								380
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "routes/users.route.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5095,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1561,
+								1561
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 405.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "kamanignite.sublime-project",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 49,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								39,
+								39
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 23.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 53.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "kamanignite.sublime-project",
+	"replace":
+	{
+		"height": 42.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 228.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

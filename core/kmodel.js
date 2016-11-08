@@ -4,13 +4,15 @@
 
 
 var _ = require("underscore");
-var config = require('../config');
+var Config = require('../core/config');
 var knex  = require('knex');
+
+var config = new Config();
 module.exports = function (opt) {
 
-
-    this.reader = new knex(config.mysqlSlots.read);
-    this.writer = new knex(config.mysqlSlots.write);
+    console.log(config);
+    this.reader = new knex(config.get('mysqlSlots').read);
+    this.writer = new knex(config.get('mysqlSlots').write);
 
 
     var self = this;
@@ -20,10 +22,6 @@ module.exports = function (opt) {
 };
 
 module.exports.prototype = {
-
-    
-
-
     extend: function (child) {
         return _.extend({}, this, child);
     }

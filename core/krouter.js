@@ -18,13 +18,15 @@ module.exports = function (opt) {
         self[key] = element;
     }, self);
 
+
+
     //todo: build a seter to fill this var and also a initial value checker
     // this.routes = opt.routes
 };
 
 module.exports.prototype = {
 
-    
+
     extend: function (child) {
         return _.extend({}, this, child);
     },

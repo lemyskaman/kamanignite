@@ -3,6 +3,15 @@
 // the server params should be a instance of a express server
 
 module.exports = {
+    isEmpty: function (obj) {
+        for (var prop in obj
+            ) {
+            if (obj.hasOwnProperty(prop))
+                return false;
+        }
+
+        return JSON.stringify(obj) === JSON.stringify({});
+    },
     'gracefulShutdown': function (server) {
         console.log("Received kill signal, shutting down gracefully.");
         server.close(function () {
@@ -16,4 +25,5 @@ module.exports = {
             process.exit()
         }, 10 * 1000);
     }
-};
+}
+;

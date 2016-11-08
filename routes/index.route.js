@@ -6,14 +6,16 @@ var Krouter = require("./../core/krouter");
 var basicAuth = require('basic-auth');
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var Promise = require('bluebird');
-var config = require('../config');
+var Config = require('../core/config');
+var config  = new Config();
+
 //var langDetect = require('../middlewares/langDetect.middleware');
-var usersModel = require('../models/users.model');
 
 
 module.exports = new Krouter({
 
     getFrontEndApp: function (req, res, next) {
+
         res.render('main', {lang: res.lang});
         next();
 
@@ -25,7 +27,7 @@ module.exports = new Krouter({
             .get(
             //pass throug lang detect
             function (req, res, next) {
-                res.lang = config.lang || 'en';
+                res.lang = config.get('lang') || 'en';
                 next()
             },
             function (req, res, next) {
@@ -34,7 +36,7 @@ module.exports = new Krouter({
             .post(
             //pass throug lang detect
             function (req, res, next) {
-                res.lang = req.body.lang || config.lang || 'en';
+                res.lang = req.body.lang || config.get('lang') || 'en';
                 next();
             },
             function (req, res, next) {
@@ -44,7 +46,7 @@ module.exports = new Krouter({
         this.router.route('/lang/:lang')
             .get(
             function (req, res, next) {
-                res.lang = req.params.lang || config.lang || 'en';
+                res.lang = req.params.lang || config.get('lang') || 'en';
                 next();
             },
             function (req, res, next) {
@@ -53,3 +55,4 @@ module.exports = new Krouter({
         )
     }
 })
+
