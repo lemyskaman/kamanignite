@@ -8,6 +8,7 @@ var bcrypt = Promise.promisifyAll(require('bcrypt'));
 var saltrounds = 10;
 const SYSTEM_GENERATED_USER_PASSWORD_STATUS = 'WFUSRTCH';
 const NEW_USER_STATUS = 'pending';
+var utils=require('../utils/kaman_utils');
 var simple_select = 'select id, username, first_name,  last_name, password_status_id, status_id from  user  where ';
 //each method should return a promise
 module.exports = new Model({
@@ -15,24 +16,40 @@ module.exports = new Model({
     schema: 'user',
     publicFields: ['id', 'username', 'first_name', 'last_name', 'status_id', 'password_status_id'],
     privateFields: ['id', 'username', 'first_name', 'last_name', 'status_id', 'password_status_id'],
-    listLimit:100,
+    listLimit: 100,
 
     //usefull to create a random pass for users
-    _randomString: function () {
+    _randomPassString: function () {
         var text = "";
-        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789*-_.$#";
 
-        for (var i = 0; i < 5; i++)
+
+        var uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        var simbols = '*-_.$#';
+        var lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        var numbers = "0123456789";
+
+        //ramdompass start with 3 letters
+        var possible = uppercase + lowercase;
+        for (var i = 0; i < 2; i++)
             text += possible.charAt(Math.floor(Math.random() * possible.length));
 
+        //continue with one simbol
+        var possible = simbols
+        for (var i = 0; i < 1; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        //and ends with a ramdom
+        var possible = simbols + numbers + uppercase + lowercase;
+        for (var i = 0; i < 3; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
         return text;
     },
 
     _getUserById: function (id) {
         return this.reader.select(this.privateFields).from('user').where('id', id);
     },
-    _hashPass:function(pass){
-      return bcrypt.hashAsync(pass, saltrounds)
+    _hashPass: function (pass) {
+        return bcrypt.hashAsync(pass, saltrounds)
     },
     addNewUser: function (user) {
         var _that = this;
@@ -52,15 +69,28 @@ module.exports = new Model({
             return Promise.reject({error: 'username or password value is missing'})
         }
     },
-    updateUser:function(id,user){
-        if (id && user){
-            return this.writer('user')
-               // .returning(this.publicFields)
-                .update(user,this.publicFields)
-                .where('id',id)
 
-        }else{
-            return Promise.reject({error: 'user id and user data to update is mandatory '})
+
+
+    selfUpdate:function(user){
+
+        var uuser =  utils.objectFilter(user,['first_name','last_name']);
+
+        return this.updateUser(uuser);
+    },
+    updateUser: function (user) {
+
+
+        if ( user) {
+            //uuser with only valid properties
+            var uuser =  utils.objectFilter(user,['username', 'first_name', 'last_name', 'status_id', 'password_status_id'])
+            return this.writer('user')
+                //update only filtred user object fields
+                .update(uuser, Object.keys(uuser))
+                .where('id', user.id)
+
+        } else {
+            return Promise.reject({error: 'user data cant be null '})
         }
     },
     find: function (guess) {
@@ -74,12 +104,12 @@ module.exports = new Model({
 
     },
     // will retrive a promise for the listLimit last elements
-    getThem:function(){
-      return this.reader
-          .select(this.publicFields)
-          .from('user')
-          .orderBy('id','DESC')
-          .limit(this.listLimit);
+    getThem: function () {
+        return this.reader
+            .select(this.publicFields)
+            .from('user')
+            .orderBy('id', 'DESC')
+            .limit(this.listLimit);
 
     },
 

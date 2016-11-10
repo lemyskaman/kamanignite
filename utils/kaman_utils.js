@@ -1,8 +1,19 @@
 // this function is called when you want the server to die gracefully
 // i.e. wait for existing connections
 // the server params should be a instance of a express server
-
+var _ = require('underscore');
 module.exports = {
+
+    objectFilter: function (obj, valid_keys) {
+        var result = {};
+        _.each(valid_keys, function (element, index, list) {
+            if (obj[element]) {
+                result[element] = obj[element];
+            }
+        })
+        return result;
+    },
+
     isEmpty: function (obj) {
         for (var prop in obj
             ) {

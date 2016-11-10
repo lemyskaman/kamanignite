@@ -10,7 +10,7 @@ module.exports = new Krouter({
     model: {
         users: usersModel
     },
-    userFields: 'cosilla',
+
     //retrive users from collection acordign a guess
     getFiltredUsers: function (req, res, next) {
         this.model.users
@@ -52,6 +52,16 @@ module.exports = new Krouter({
     //neds a data check middleware
     newUser: function (req, res, next) {
 
+
+
+        //in case we have empty password value on boddy
+        //we filli up with a model defult ramdon function for pass
+        if (!req.body.password) {
+            req.body.password = this.model.users._randomPassString();
+        } else if (req.body.password.length === undefined) {
+            req.body.password = this.model.users._randomPassString();
+        }
+
         var user = {
             username: req.body.username,
             first_name: req.body.first_name,
@@ -59,15 +69,17 @@ module.exports = new Krouter({
             password: req.body.password
         };
 
-        console.log(req.body);
 
         this.model.users
             .addNewUser(user)
             .then(function (rows) {
                 //at this point we should be able to retrive some fields of the
-                //new user recod but instead we are only getting the id os the new record
-                //
-                res.status(200).json(rows[0])
+                //new user recod but instead maybe becouse there is something wrong
+                // we are only getting the id of the new record
+                //on the rows object so we are goin to add the original user object to the response
+                user.id = rows[0];
+                user.password = req.body.password;
+                res.status(200).json(user);
             })
             .catch(function (err) {
                 //onsole.log('register User catch error',err)
@@ -145,8 +157,6 @@ module.exports = new Krouter({
                 _that.getUsers(req, res, next)
             })
     }
-
-
 
 
 })
