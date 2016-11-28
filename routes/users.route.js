@@ -1,9 +1,12 @@
 var Krouter = require("./../core/krouter");
 var _ = require("underscore");
 var basicAuth = require('basic-auth');
-var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
+
 var Promise = require('bluebird');
+//var readFile = Promise.promisify(require("fs").readFile);
+var jwt = Promise.promisifyAll(require('jsonwebtoken')); // used to create, sign, and verify tokens
 var bcrypt = Promise.promisifyAll(require('bcrypt'));
+
 var usersModel = require('../models/users.model');
 var utils = require('../utils/kaman_utils');
 
@@ -49,9 +52,9 @@ module.exports = new Krouter({
         return req;
     },
 
-    _passwordCompare:function(test,hash){
-        console.log(test,hash);
-       return  bcrypt.compareAsync(test,hash);
+    _passwordCompare: function (test, hash) {
+        console.log(test, hash);
+        return bcrypt.compareAsync(test, hash);
     },
     //retrive users from collection acordign a guess
     getFiltredUsers: function (req, res, next) {
@@ -167,66 +170,102 @@ module.exports = new Krouter({
         }
     },
 
-    _authFail:function(res){
-        res.status(401).json({error:'authentication fail wrong username or pasword'})
+    _authFail: function (res) {
+        res.status(401).json({error: 'authentication fail wrong username or pasword'})
     },
     authenticate: function (req, res, next) {
-        var _that  = this ;
+        var _that = this;
         var reqUser = this._reqBodyAtr(req);
-        this.model.users._getByUsername(reqUser.username)//finding the user on db
-            .then(function(users){
-                var success  = 0;
-                if (users.length===1 ){//if we find a user
+        var matchedUser = {};
+
+        var userRetriving = {},
+            passComparsion = {},
+            tokenCreation = {};
+
+        userRetriving = this.model.users._getByUsername(reqUser.username);
+        userRetriving
+            .then(function (users) {//if a correct db connection and query
+                var success = 0;
+                if (users.length === 1) {//if we find a user
+                    matchedUser = users[0];
                     console.log('auth req user:')
                     console.log(reqUser);
                     console.log('auth db user')
-                    console.log(users[0]);
-                    _that._passwordCompare(reqUser.password,users[0].password)//check for pasword
-                        .then(function(check){
-                            if (check===true){//if passwor match with db pass
-                                res.status(200).json(utils.objectFilter(users[0],_that.model.users.publicFields));
-                            }else{//passwor dont match the user o db
+                    console.log(matchedUser);
+                    _that._passwordCompare(reqUser.password, matchedUser.password)
+                        .then(function (check) {
+                            if (check === true) {//if passwor match with db pass
+                                console.log('jwt user');
+                                console.log(utils.objectFilter(matchedUser, _that.model.users.publicFields));
+                                console.log('secret');
+                                console.log(_that.config.get('secret'));
+                                return jwt.signAsync(
+                                    utils.objectFilter(matchedUser, _that.model.users.publicFields),
+                                    _that.config.get('secret'),
+                                    {
+                                        algorithm: 'HS256',
+                                        expiresIn:'4h'
+                                    });
+
+                                //res.status(200).json(utils.objectFilter(users[0], _that.model.users.publicFields));
+                            } else {//passwor dont match the user o db
                                 console.log('authentication fail: password dont match user')
                                 _that._authFail(res)
                             }
 
                         })
-                        .catch(function(err){
+                        .then(function(token){
+                            res.status(200).json({user:utils.objectFilter(matchedUser, _that.model.users.publicFields),token:token})
+                        })
+                        .catch(function (err) {
+                            console.log('token generation error')
+                            console.log(err)
+                            res.status(500).json({
+                                error: {
+                                    action: 'jwt.singAsync',
+                                    content: err
+                                }
+                            })
+                        })
+                        .catch(function (err) {
                             console.log('password compare error')
                             console.log(err)
-                            res.status(500).json({error:{
-                                action:'passwordCompare',
-                                content:err
-                            }})
+                            res.status(500).json({
+                                error: {
+                                    action: 'passwordCompare',
+                                    content: err
+                                }
+                            })
                         })
-
-                }else{ // user not found
+                } else { // user not found
                     console.log('authentication fail: user not found')
                     _that._authFail(res);
                 }
-
-
             })
-            .catch(function(err){//mysql connection error
+            .catch(function (err) {//if mysql connection or mysql related error
                 console.log(err)
-                res.status(500).json({error:{
-                    action:'_getByUsername',
-                    content:err
-                }});
-            })
+                res.status(500).json({
+                    error: {
+                        action: '_getByUsername',
+                        content: err
+                    }
+                });
+            });
+
+
     },
 
     /*-----------Mandatory----------*/
     setEndPoints: function () {
         var _that = this
         this.router.route('/user')
-            //adds a new user
+        //adds a new user
             .post(function (req, res, next) {
                 _that.newUser(req, res, next);
             })
 
         this.router.route('/user/:id')
-            //edit user
+        //edit user
             .put(function (req, res, next) {
                 _that.updateUser(req, res, next)
             })
@@ -236,13 +275,14 @@ module.exports = new Krouter({
             });
 
         this.router.route('/user/passwordset/:id')
-            //update an user pass
+        //update an user pass
             .put(function (req, res, next) {
                 _that.passwordSet(req, res, next)
-            })
+            });
+
         this.router.route('/authenticate')
-            .post(function (req,res,next){
-                _that.authenticate(req,res,next);
+            .post(function (req, res, next) {
+                _that.authenticate(req, res, next);
             })
 
 
@@ -252,14 +292,14 @@ module.exports = new Krouter({
          _that.getUser(req, res, next);
          });*/
         this.router.route('/users/:guess')
-            //retrive a limited user list based on the guess
+        //retrive a limited user list based on the guess
             .get(function (req, res, next) {
                 _that.getFiltredUsers(req, res, next);
             });
 
 
         this.router.route('/users') //this route should be avoided
-            //retrive all the system users
+        //retrive all the system users
             .get(function (req, res, next) {
                 _that.getUsers(req, res, next)
             })

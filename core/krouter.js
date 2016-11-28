@@ -3,15 +3,15 @@
  */
 var _ = require("underscore");
 var router = require('express').Router();
-
-
+var Config = require('../core/config');
+var config = new Config();
 module.exports = function (opt) {
 
     // this.nature=opt.nature
     //this.model
 
     this.name = opt.name;
-    
+    this.config = config;
     this.router = router;
     var self = this;
     _.map(opt, function (element, key, list) {

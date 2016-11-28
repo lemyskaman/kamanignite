@@ -49,6 +49,7 @@ module.exports = new Model({
         return this.reader.select(this.publicFields).from('user').where('id', id);
     },
     _getByUsername : function(username){
+        
         return this.reader
             .select(this.fields)
             .from('user')
