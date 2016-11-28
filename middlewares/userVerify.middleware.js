@@ -8,7 +8,14 @@ var jwt = require('jsonwebtoken');
 
 module.exports = new kmiddleware({
 
-    _
+    _authFail:function(res){
+        return res.status(401).json({
+            auth:{
+                success:false,
+                message:'no token provided or Failed to authenticate token. '
+            }
+        })
+    },
 
     run: function (req, res, next) {
         var _that = this;
@@ -20,7 +27,7 @@ module.exports = new kmiddleware({
             // verifies secret and checks exp
             jwt.verify(token, _that.config.get('secret'), function (err, decoded) {
                 if (err) {
-                    return res.json({success: false, message: 'Failed to authenticate token.'});
+                    _that._authFail(res);
                 } else {
                     // if everything is good, save to request for use in other routes
                     req.decoded = decoded;
@@ -32,11 +39,7 @@ module.exports = new kmiddleware({
 
             // if there is no token
             // return an error
-            return res.status(403).send({
-                success: false,
-                message: 'No token provided.'
-            });
-
+            _that._authFail(res);
         }
 
 

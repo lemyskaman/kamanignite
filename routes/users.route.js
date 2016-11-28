@@ -171,7 +171,7 @@ module.exports = new Krouter({
     },
 
     _authFail: function (res) {
-        res.status(401).json({error: 'authentication fail wrong username or pasword'})
+        res.status(401).json({auth:{success:false,message:'non valid combination of username and password'}})
     },
     authenticate: function (req, res, next) {
         var _that = this;
