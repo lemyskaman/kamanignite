@@ -8,14 +8,14 @@ var bcrypt = Promise.promisifyAll(require('bcrypt'));
 var saltrounds = 10;
 const SYSTEM_GENERATED_USER_PASSWORD_STATUS = 'WFUSRTCH';
 const NEW_USER_STATUS = 'pending';
-var utils=require('../utils/kaman_utils');
+var utils = require('../utils/kaman_utils');
 var simple_select = 'select id, username, first_name,  last_name, password_status_id, status_id from  user  where ';
 //each method should return a promise
 module.exports = new Model({
 
     schema: 'user',
     publicFields: ['id', 'username', 'first_name', 'last_name', 'status_id', 'password_status_id'],
-    privateFields: ['id', 'username', 'first_name', 'last_name', 'status_id', 'password_status_id'],
+    fields: ['id', 'username','password', 'first_name', 'last_name', 'status_id', 'password_status_id'],
     listLimit: 100,
 
     //usefull to create a random pass for users
@@ -45,9 +45,17 @@ module.exports = new Model({
         return text;
     },
 
-    _getUserById: function (id) {
-        return this.reader.select(this.privateFields).from('user').where('id', id);
+    _getById: function (id) {
+        return this.reader.select(this.publicFields).from('user').where('id', id);
     },
+    _getByUsername : function(username){
+        return this.reader
+            .select(this.fields)
+            .from('user')
+            .where('username',  username )
+            .limit(1)
+    },
+
     _hashPass: function (pass) {
         return bcrypt.hashAsync(pass, saltrounds)
     },
@@ -59,10 +67,10 @@ module.exports = new Model({
                     user.password = pass;
                     user.status_id = NEW_USER_STATUS;
                     user.password_status_id = SYSTEM_GENERATED_USER_PASSWORD_STATUS;
-                    //next should return privateFields but is not doing it
+                    //next should return fields but is not doing it
                     //it only returns the new user id  iguess is something related to mysql
                     //more than knexjs
-                    return _that.writer('user').returning(this.privateFields).insert(user);
+                    return _that.writer('user').returning(this.fields).insert(user);
                 })
 
         } else {
@@ -71,19 +79,18 @@ module.exports = new Model({
     },
 
 
+    selfUpdate: function (user) {
 
-    selfUpdate:function(user){
-
-        var uuser =  utils.objectFilter(user,['first_name','last_name']);
+        var uuser = utils.objectFilter(user, ['first_name', 'last_name']);
 
         return this.updateUser(uuser);
     },
     updateUser: function (user) {
 
 
-        if ( user) {
+        if (user) {
             //uuser with only valid properties
-            var uuser =  utils.objectFilter(user,['username', 'first_name', 'last_name', 'status_id', 'password_status_id'])
+            var uuser = utils.objectFilter(user, ['username', 'first_name', 'last_name', 'status_id', 'password_status_id'])
             return this.writer('user')
                 //update only filtred user object fields
                 .update(uuser, Object.keys(uuser))
@@ -93,6 +100,29 @@ module.exports = new Model({
             return Promise.reject({error: 'user data cant be null '})
         }
     },
+
+    updatePass: function (user) {
+        var _that=this;
+        console.log(user);
+        if (user.password && user.id) {
+
+            var uuser = utils.objectFilter(user, [ 'password','password_status_id']);
+
+
+            return this._hashPass(user.password)
+                .then(function (pass) {
+                    uuser.password = pass;
+
+                    return _that.writer('user')
+                        .update(uuser, Object.keys(uuser))
+                        .where('id',user.id)
+                })
+
+        }else{
+            return Promise.reject({error: 'invalid request data '})
+        }
+    },
+
     find: function (guess) {
         return this.reader
             .select(this.publicFields)

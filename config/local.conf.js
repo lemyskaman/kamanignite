@@ -5,6 +5,7 @@
 module.exports = {
     ip: '127.0.0.1',
     lang: 'es',
+    secret: 'K4MaN',
     port: 4000,
     mongoUrl: 'mongodb://127.0.0.1/kamanweb',
     mysqlSlots: {
@@ -29,8 +30,8 @@ module.exports = {
                 password: '8524567193orionandromeda**',
                 database: 'ma'
             }
-        },
-    },
+        }
+    }
 
 
-}
+};

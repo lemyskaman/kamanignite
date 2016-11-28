@@ -8,3 +8,5 @@ config.js
 config/
 .sublime-project
 .idea/
+start
+

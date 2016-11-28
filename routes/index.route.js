@@ -16,7 +16,7 @@ module.exports = new Krouter({
 
     getFrontEndApp: function (req, res, next) {
 
-        res.render('main_webpack', {lang: res.lang});
+        res.render('main', {lang: res.lang});
         next();
 
     },
