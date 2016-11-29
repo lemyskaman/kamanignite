@@ -6,7 +6,8 @@ var Model = require('../core/kmodel');
 var Promise = require('bluebird');
 var bcrypt = Promise.promisifyAll(require('bcrypt'));
 var saltrounds = 10;
-const SYSTEM_GENERATED_USER_PASSWORD_STATUS = 'WFUSRTCH';
+const THIRD_PARTY_CREATED_USER_PASSWORD_STATUS = 'WFUSRTCH';
+const SELF_CREATED_USER_PASSWORD_STATUS = 'USRCHANGED';
 const NEW_USER_STATUS = 'pending';
 var utils = require('../utils/kaman_utils');
 var simple_select = 'select id, username, first_name,  last_name, password_status_id, status_id from  user  where ';
@@ -80,12 +81,7 @@ module.exports = new Model({
     },
 
 
-    selfUpdate: function (user) {
-
-        var uuser = utils.objectFilter(user, ['first_name', 'last_name']);
-
-        return this.updateUser(uuser);
-    },
+ 
     updateUser: function (user) {
 
 
@@ -107,9 +103,38 @@ module.exports = new Model({
         console.log(user);
         if (user.password && user.id) {
 
-            var uuser = utils.objectFilter(user, [ 'password','password_status_id']);
+            var uuser = utils.objectFilter(user, [ 'password']);
 
+            uuser.password = THIRD_PARTY_CREATED_USER_PASSWORD_STATUS;
+            return this._hashPass(user.password)
+                .then(function (pass) {
+                    uuser.password = pass;
 
+                    return _that.writer('user')
+                        .update(uuser, Object.keys(uuser))
+                        .where('id',user.id)
+                })
+
+        }else{
+            return Promise.reject({error: 'invalid request data '})
+        }
+    },
+    
+    selfUpdate: function (user) {
+
+        var uuser = utils.objectFilter(user, ['first_name', 'last_name']);
+
+        return this.updateUser(uuser);
+    },
+
+    selfUpdatePass: function(user){
+        var _that=this;
+        console.log(user);
+        if (user.password && user.id) {
+
+            var uuser = utils.objectFilter(user, [ 'password']);
+
+            uuser.password = SELF_CREATED_USER_PASSWORD_STATUS;
             return this._hashPass(user.password)
                 .then(function (pass) {
                     uuser.password = pass;

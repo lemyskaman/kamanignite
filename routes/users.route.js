@@ -9,12 +9,15 @@ var bcrypt = Promise.promisifyAll(require('bcrypt'));
 
 var usersModel = require('../models/users.model');
 var utils = require('../utils/kaman_utils');
+var userVerifyMiddleware = require('../middlewares/userVerify.middleware');
+
 
 module.exports = new Krouter({
 
     model: {
         users: usersModel
     },
+
 
     //justreturn an object with the body val
     _reqBodyAtr: function (req) {
@@ -144,10 +147,10 @@ module.exports = new Krouter({
 
 
     },
+
     passwordSet: function (req, res, next) {
 
         var user = this._reqBodyAtr(this._emptyPasswordFix(req));
-
 
         this.model.users
             .updatePass(user)
@@ -161,17 +164,44 @@ module.exports = new Krouter({
             })
 
     },
+    selfUpdate:function (req,res,next) {
+        _that = this;
+        console.log(req.body)
+        var user = this._reqBodyAtr(req);
 
-    passwordReset: function (req, res, next) {
+        this.model.users.selfUpdate(user)
+            .then(function (rows) {
+                res.status(200).json(user)
+            })
+            .catch(function (err) {
+                //onsole.log('register User catch error',err)
+                res.status(500).json(err)
+            })
 
-        var user = this._reqBodyAtr(req)
-        if (user.id && user.password) {
+    },
+    selfPasswordSet: function (req, res, next) {
 
-        }
+        var user = this._reqBodyAtr(this._emptyPasswordFix(req));
+
+        this.model.users
+            .selfUpdatePass(user)
+            .then(function (rows) {
+                user.password = req.body.password;
+                res.status(200).json(user);
+            })
+            .catch(function (err) {
+                //onsole.log('register User catch error',err)
+                res.status(500).json(err)
+            })
+
     },
 
+
+
+
+
     _authFail: function (res) {
-        res.status(401).json({auth:{success:false,message:'non valid combination of username and password'}})
+        res.status(401).json({auth: {success: false, message: 'non valid combination of username and password'}})
     },
     authenticate: function (req, res, next) {
         var _that = this;
@@ -204,7 +234,7 @@ module.exports = new Krouter({
                                     _that.config.get('secret'),
                                     {
                                         algorithm: 'HS256',
-                                        expiresIn:'4h'
+                                        expiresIn: '4h'
                                     });
 
                                 //res.status(200).json(utils.objectFilter(users[0], _that.model.users.publicFields));
@@ -214,8 +244,11 @@ module.exports = new Krouter({
                             }
 
                         })
-                        .then(function(token){
-                            res.status(200).json({user:utils.objectFilter(matchedUser, _that.model.users.publicFields),token:token})
+                        .then(function (token) {
+                            res.status(200).json({
+                                user: utils.objectFilter(matchedUser, _that.model.users.publicFields),
+                                token: token
+                            })
                         })
                         .catch(function (err) {
                             console.log('token generation error')
@@ -258,6 +291,12 @@ module.exports = new Krouter({
     /*-----------Mandatory----------*/
     setEndPoints: function () {
         var _that = this
+
+        this.router.route('/me')
+            .put(function(req,res,next){
+                
+            })
+        
         this.router.route('/user')
         //adds a new user
             .post(function (req, res, next) {
@@ -273,6 +312,8 @@ module.exports = new Krouter({
             .get(function (req, res, next) {
                 _that.getUser(req, res, next);
             });
+        
+        
 
         this.router.route('/user/passwordset/:id')
         //update an user pass
@@ -300,9 +341,10 @@ module.exports = new Krouter({
 
         this.router.route('/users') //this route should be avoided
         //retrive all the system users
-            .get(function (req, res, next) {
-                _that.getUsers(req, res, next)
-            })
+            .get(
+                function (req, res, next) {
+                    _that.getUsers(req, res, next)
+                })
     }
 
 

@@ -13,7 +13,7 @@ var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var _ = require('underscore');
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
-
+var userVerifyMiddleware = require('./middlewares/userVerify.middleware');
 
 var config = new Configuration();
 var app = express();
@@ -31,9 +31,16 @@ app.use(morgan('dev'));
 var routes = {};
 routes.index = require('./routes/index.route.js');
 routes.users = require('./routes/users.route.js');
+
+
 //a front end html magic will be builded and deliver from here
 app.use(routes.index.getRouter());
 
+//an authenticate user is mandatory after this middleware
+app.use(function (req, res, next) {
+
+    userVerifyMiddleware.run(req, res, next)
+});
 
 app.use('/resources', routes.users.getRouter());
 //all static files will be served from here
