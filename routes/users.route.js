@@ -9,7 +9,7 @@ var bcrypt = Promise.promisifyAll(require('bcrypt'));
 
 var usersModel = require('../models/users.model');
 var utils = require('../utils/kaman_utils');
-var userVerifyMiddleware = require('../middlewares/userVerify.middleware');
+var userVerifyMiddleware = require('../middlewares/tokenVerify.middleware.js');
 
 
 module.exports = new Krouter({
@@ -19,29 +19,7 @@ module.exports = new Krouter({
     },
 
 
-    //justreturn an object with the body val
-    _reqBodyAtr: function (req) {
-        var fields = this.model.users.fields;
-        console.log('fields')
-        console.log(fields);
 
-
-        var result = {};
-        _.each(fields, function (element, index, list) {
-            console.log(element)
-            console.log(req.body[element])
-
-            //adding the id get param  as a body attribute
-            if (element === 'id')
-                if (req.params.id)
-                    req.body.id = req.params.id
-
-            if (req.body[element]) {
-                result[element] = req.body[element];
-            }
-        }, this)
-        return result;
-    },
     //in case we have empty password value on boddy
     //we filli up with a model defult ramdon function for pass
     _emptyPasswordFix: function (req) {
@@ -55,10 +33,7 @@ module.exports = new Krouter({
         return req;
     },
 
-    _passwordCompare: function (test, hash) {
-        console.log(test, hash);
-        return bcrypt.compareAsync(test, hash);
-    },
+
     //retrive users from collection acordign a guess
     getFiltredUsers: function (req, res, next) {
         this.model.users
@@ -134,7 +109,7 @@ module.exports = new Krouter({
     updateUser: function (req, res, next) {
         _that = this;
         console.log(req.body)
-        var user = this._reqBodyAtr(req);
+        var user = this.model.users._reqBodyAtr(req);
 
         this.model.users.updateUser(user)
             .then(function (rows) {
@@ -150,7 +125,7 @@ module.exports = new Krouter({
 
     passwordSet: function (req, res, next) {
 
-        var user = this._reqBodyAtr(this._emptyPasswordFix(req));
+        var user = this.model.users._reqBodyAtr(this._emptyPasswordFix(req));
 
         this.model.users
             .updatePass(user)
@@ -164,10 +139,10 @@ module.exports = new Krouter({
             })
 
     },
-    selfUpdate:function (req,res,next) {
+    selfUpdate: function (req, res, next) {
         _that = this;
         console.log(req.body)
-        var user = this._reqBodyAtr(req);
+        var user = this.this.model.users._reqBodyAtr(req);
 
         this.model.users.selfUpdate(user)
             .then(function (rows) {
@@ -181,7 +156,7 @@ module.exports = new Krouter({
     },
     selfPasswordSet: function (req, res, next) {
 
-        var user = this._reqBodyAtr(this._emptyPasswordFix(req));
+        var user = this.this.model.users._reqBodyAtr(this._emptyPasswordFix(req));
 
         this.model.users
             .selfUpdatePass(user)
@@ -197,106 +172,17 @@ module.exports = new Krouter({
     },
 
 
-
-
-
-    _authFail: function (res) {
-        res.status(401).json({auth: {success: false, message: 'non valid combination of username and password'}})
-    },
-    authenticate: function (req, res, next) {
-        var _that = this;
-        var reqUser = this._reqBodyAtr(req);
-        var matchedUser = {};
-
-        var userRetriving = {},
-            passComparsion = {},
-            tokenCreation = {};
-
-        userRetriving = this.model.users._getByUsername(reqUser.username);
-        userRetriving
-            .then(function (users) {//if a correct db connection and query
-                var success = 0;
-                if (users.length === 1) {//if we find a user
-                    matchedUser = users[0];
-                    console.log('auth req user:')
-                    console.log(reqUser);
-                    console.log('auth db user')
-                    console.log(matchedUser);
-                    _that._passwordCompare(reqUser.password, matchedUser.password)
-                        .then(function (check) {
-                            if (check === true) {//if passwor match with db pass
-                                console.log('jwt user');
-                                console.log(utils.objectFilter(matchedUser, _that.model.users.publicFields));
-                                console.log('secret');
-                                console.log(_that.config.get('secret'));
-                                return jwt.signAsync(
-                                    utils.objectFilter(matchedUser, _that.model.users.publicFields),
-                                    _that.config.get('secret'),
-                                    {
-                                        algorithm: 'HS256',
-                                        expiresIn: '4h'
-                                    });
-
-                                //res.status(200).json(utils.objectFilter(users[0], _that.model.users.publicFields));
-                            } else {//passwor dont match the user o db
-                                console.log('authentication fail: password dont match user')
-                                _that._authFail(res)
-                            }
-
-                        })
-                        .then(function (token) {
-                            res.status(200).json({
-                                user: utils.objectFilter(matchedUser, _that.model.users.publicFields),
-                                token: token
-                            })
-                        })
-                        .catch(function (err) {
-                            console.log('token generation error')
-                            console.log(err)
-                            res.status(500).json({
-                                error: {
-                                    action: 'jwt.singAsync',
-                                    content: err
-                                }
-                            })
-                        })
-                        .catch(function (err) {
-                            console.log('password compare error')
-                            console.log(err)
-                            res.status(500).json({
-                                error: {
-                                    action: 'passwordCompare',
-                                    content: err
-                                }
-                            })
-                        })
-                } else { // user not found
-                    console.log('authentication fail: user not found')
-                    _that._authFail(res);
-                }
-            })
-            .catch(function (err) {//if mysql connection or mysql related error
-                console.log(err)
-                res.status(500).json({
-                    error: {
-                        action: '_getByUsername',
-                        content: err
-                    }
-                });
-            });
-
-
-    },
+   
 
     /*-----------Mandatory----------*/
     setEndPoints: function () {
         var _that = this
 
         this.router.route('/me')
-            .put(function(req,res,next){
-                
+            .put(function (req, res, next) {
+
             })
-        
+
         this.router.route('/user')
         //adds a new user
             .post(function (req, res, next) {
@@ -312,19 +198,13 @@ module.exports = new Krouter({
             .get(function (req, res, next) {
                 _that.getUser(req, res, next);
             });
-        
-        
+
 
         this.router.route('/user/passwordset/:id')
         //update an user pass
             .put(function (req, res, next) {
                 _that.passwordSet(req, res, next)
             });
-
-        this.router.route('/authenticate')
-            .post(function (req, res, next) {
-                _that.authenticate(req, res, next);
-            })
 
 
         /*

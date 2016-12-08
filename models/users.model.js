@@ -18,7 +18,29 @@ module.exports = new Model({
     publicFields: ['id', 'username', 'first_name', 'last_name', 'status_id', 'password_status_id'],
     fields: ['id', 'username','password', 'first_name', 'last_name', 'status_id', 'password_status_id'],
     listLimit: 100,
+    //justreturn an object with the body val
+    _reqBodyAtr: function (req) {
+        var fields = this.fields;
+        console.log('fields')
+        console.log(fields);
 
+
+        var result = {};
+        _.each(fields, function (element, index, list) {
+            console.log(element)
+            console.log(req.body[element])
+
+            //adding the id get param  as a body attribute
+            if (element === 'id')
+                if (req.params.id)
+                    req.body.id = req.params.id
+
+            if (req.body[element]) {
+                result[element] = req.body[element];
+            }
+        }, this)
+        return result;
+    },
     //usefull to create a random pass for users
     _randomPassString: function () {
         var text = "";

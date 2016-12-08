@@ -30,7 +30,7 @@ module.exports = new kmiddleware({
                     _that._authFail(res);
                 } else {
                     // if everything is good, save to request for use in other routes
-                    req.tokenData = decoded;
+                    req.decoded = decoded;
                     next();
                 }
             });
