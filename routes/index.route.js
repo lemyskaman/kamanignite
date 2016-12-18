@@ -52,7 +52,7 @@ module.exports = new Krouter({
             function (req, res, next) {
                 that.getFrontEndApp(req, res, next);
             }
-        )
+        );
     }
 })
 
