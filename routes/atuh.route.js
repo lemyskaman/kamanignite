@@ -23,7 +23,7 @@ module.exports = new Krouter({
     }
     ,
     _authFail: function (res) {
-        res.status(401).json({auth: false, message: 'non valid combination of username and password'})
+        res.status(401).json({error:{auth: false, message: 'non valid combination of username and password'}})
     }
     ,
     authenticate: function (req, res, next) {
@@ -115,7 +115,7 @@ module.exports = new Krouter({
     setEndPoints: function () {
         var _that = this;
         this.router.route('/authenticate')
-            .post(function (req, res, next) {
+            .put(function (req, res, next) {
                 _that.authenticate(req, res, next);
             })
 

@@ -9,7 +9,7 @@ html(lang=lang)
         meta(name='viewport', content='width=device-width, initial-scale=1')
         meta(name="description" content="a KamanApp based solution")
         meta(name="author" content="lemys lopez")
-        
+
         // bootstrap core css
         link(href='../static/kamanapp_modules/sbadmin2_ui/sbadmin2/vendor/bootstrap/css/bootstrap.min.css', rel='stylesheet')
         // MetisMenu CSS
@@ -28,13 +28,17 @@ html(lang=lang)
         script(type='application/javascript').
             const LANG = document.documentElement.lang;
             console.log('a kamanapp ui')
-            console.log('display language: '+LANG)
+            console.log('display language: ' + LANG)
+
     body(role='document')
-        //#root
+        #root
         // jQuery
         script(src='../static/kamanapp_modules/sbadmin2_ui/sbadmin2/vendor/jquery/jquery.min.js')
         // Bootstrap Core JavaScript
         script(src='../static/kamanapp_modules/sbadmin2_ui/sbadmin2/vendor/bootstrap/js/bootstrap.min.js')
+        //notify
+        script(src='../static/assets/js/bootstrap_notify.js')
+
         // Metis Menu Plugin JavaScript
         script(src='../static/kamanapp_modules/sbadmin2_ui/sbadmin2/vendor/metisMenu/metisMenu.min.js')
         // Morris Charts JavaScript
@@ -43,5 +47,4 @@ html(lang=lang)
         //script(src='../static/kamanapp_modules/sbadmin2_ui/sbadmin2/data/morris-data.js')
         // Custom Theme JavaScript
         script(src='../static/kamanapp_modules/sbadmin2_ui/sbadmin2/dist/js/sb-admin-2.js')
-
         script(src='../static/bundled_app.js')
