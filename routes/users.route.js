@@ -79,7 +79,7 @@ module.exports = new Krouter({
 
         //in case we have empty password value on boddy
         //we filli up with a model defult ramdon function for pass
-        req = _emptyPasswordFix(req);
+        req = this._emptyPasswordFix(req);
         var user = {
             username: req.body.username,
             first_name: req.body.first_name,
@@ -100,7 +100,7 @@ module.exports = new Krouter({
                 res.status(200).json(user);
             })
             .catch(function (err) {
-                //onsole.log('register User catch error',err)
+                console.log('register User catch error',err)
                 res.status(500).json(err)
             })
 

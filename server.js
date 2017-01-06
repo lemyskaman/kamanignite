@@ -9,6 +9,7 @@ const Configuration = require('./core/config');
 
 
 var express = require('express');
+
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var favicon  =  require('serve-favicon');
@@ -41,16 +42,16 @@ app.use(favicon(__dirname + '/static/assets/favicon.png'));
 // for production enviorment ngix is recomendable to do this job
 app.use('/static', express.static('static/'));
 
-//a front end html magic will be builded and deliver from here
+//a front end html/javascript magic will  delivered from here
 app.use(routes.index.getRouter());
 
-//authentication scapes from verifymiddleware
+//authentication its out side from verifyig middleware
 app.use('/resources', routes.auth.getRouter());
 
 //an authenticated user is mandatory after this middleware
-app.use(function (req, res, next) {
-
-    next()//userVerifyMiddleware.run(req, res, next);
+app.use(function(req,res,next){
+    userVerifyMiddleware.run(req,res,next);
+    //next();
 });
 
 app.use('/resources', routes.users.getRouter());
@@ -60,6 +61,7 @@ app.use('/resources', routes.users.getRouter());
 //routes stablishing
 //app.use('/resoruces', routes.users.getRouter());
 var server = app.listen(config.get('port'), config.get('ip'), function () {
+
     console.log('Express server listening');
     console.log('form ' + config.get('ip') + ' on port ' + config.get('port') + '');
 })

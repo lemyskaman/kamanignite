@@ -85,12 +85,13 @@ module.exports = new Model({
     },
     addNewUser: function (user) {
         var _that = this;
+        console.log(user.password)
         if (user.password && user.username) {
             return this._hashPass(user.password)
                 .then(function (pass) {
                     user.password = pass;
                     user.status_id = NEW_USER_STATUS;
-                    user.password_status_id = SYSTEM_GENERATED_USER_PASSWORD_STATUS;
+                    user.password_status_id = THIRD_PARTY_CREATED_USER_PASSWORD_STATUS;
                     //next should return fields but is not doing it
                     //it only returns the new user id  iguess is something related to mysql
                     //more than knexjs
@@ -127,7 +128,8 @@ module.exports = new Model({
 
             var uuser = utils.objectFilter(user, [ 'password']);
 
-            uuser.password = THIRD_PARTY_CREATED_USER_PASSWORD_STATUS;
+            uuser.password_status_id = THIRD_PARTY_CREATED_USER_PASSWORD_STATUS;
+            uuser.password = user.password; 
             return this._hashPass(user.password)
                 .then(function (pass) {
                     uuser.password = pass;

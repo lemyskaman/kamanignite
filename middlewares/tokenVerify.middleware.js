@@ -18,6 +18,7 @@ module.exports = new kmiddleware({
     },
 
     run: function (req, res, next) {
+        console.log('authorize runnig','authorize runnig','authorize runnig','authorize runnig','authorize runnig','authorize runnig','authorize runnig','authorize runnig','authorize runnig','authorize runnig','authorize runnig','authorize runnig','authorize runnig');
         var _that = this;
         //as shown on https://scotch.io/tutorials/authenticate-a-node-js-api-with-json-web-tokens
         var token = req.body.token || req.query.token || req.headers['x-access-token'];

@@ -2,7 +2,7 @@
  * Created by lemyskaman on 25/07/16.
  */
 var _ = require("underscore");
-var router = require('express').Router();
+
 var Config = require('../core/config');
 var config = new Config();
 module.exports = function (opt) {
@@ -12,7 +12,7 @@ module.exports = function (opt) {
 
     this.name = opt.name;
     this.config = config;
-    this.router = router;
+    this.router = require('express').Router();
     var self = this;
     _.map(opt, function (element, key, list) {
         self[key] = element;
