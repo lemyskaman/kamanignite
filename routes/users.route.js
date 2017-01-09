@@ -218,13 +218,14 @@ module.exports = new Krouter({
                 _that.getFiltredUsers(req, res, next);
             });
 
-
+/*
         this.router.route('/users') //this route should be avoided
         //retrive all the system users
             .get(
                 function (req, res, next) {
                     _that.getUsers(req, res, next)
                 })
+                */
     }
 
 

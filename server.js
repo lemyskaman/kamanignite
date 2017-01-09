@@ -50,8 +50,8 @@ app.use('/resources', routes.auth.getRouter());
 
 //an authenticated user is mandatory after this middleware
 app.use(function(req,res,next){
-    userVerifyMiddleware.run(req,res,next);
-    //next();
+    //userVerifyMiddleware.run(req,res,next);
+    next();
 });
 
 app.use('/resources', routes.users.getRouter());
