@@ -41,7 +41,7 @@ module.exports = new Krouter({
             .then(function (rows) {
                 res.status(200).json(rows);
             })
-            .catch(function (err) {
+              .catch(function (err) {
                 res.status(500).json(err);
                 console.log(err)
             })
