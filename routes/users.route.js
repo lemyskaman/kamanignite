@@ -101,6 +101,7 @@ module.exports = new Krouter({
             })
             .catch(function (err) {
                 console.log('register User catch error',err)
+                //err.error='error creating user'
                 res.status(500).json(err)
             })
 
