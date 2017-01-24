@@ -30,10 +30,14 @@ app.set('basePath', __dirname);
 app.set('token_secret', 'kamankaman');
 app.use(morgan('dev'));
 
+var statusModel=require('./models/status.model.js')
 var routes = {};
 routes.index = require('./routes/index.route.js');
 routes.users = require('./routes/users.route.js');
 routes.auth = require('./routes/atuh.route.js');
+
+
+
 
 
 //icon
@@ -44,6 +48,22 @@ app.use('/static', express.static('static/'));
 
 //a front end html/javascript magic will  delivered from here
 app.use(routes.index.getRouter());
+
+
+//system statues
+
+app.use('/sys_status',function(req,res){
+    statusModel
+        .getThem()
+        .then(function (rows) {
+            res.status(200).json(rows)
+        })
+        .catch(function (err) {
+            res.status(500).json(err)
+        })
+})
+
+
 
 //authentication its out side from verifyig middleware
 app.use('/resources', routes.auth.getRouter());

@@ -19,7 +19,6 @@ module.exports = new Krouter({
     },
 
 
-
     //in case we have empty password value on boddy
     //we filli up with a model defult ramdon function for pass
     _emptyPasswordFix: function (req) {
@@ -41,7 +40,7 @@ module.exports = new Krouter({
             .then(function (rows) {
                 res.status(200).json(rows);
             })
-              .catch(function (err) {
+            .catch(function (err) {
                 res.status(500).json(err);
                 console.log(err)
             })
@@ -100,7 +99,7 @@ module.exports = new Krouter({
                 res.status(200).json(user);
             })
             .catch(function (err) {
-                console.log('register User catch error',err)
+                console.log('register User catch error', err)
                 //err.error='error creating user'
                 res.status(500).json(err)
             })
@@ -173,8 +172,6 @@ module.exports = new Krouter({
     },
 
 
-   
-
     /*-----------Mandatory----------*/
     setEndPoints: function () {
         var _that = this
@@ -185,13 +182,13 @@ module.exports = new Krouter({
             })
 
         this.router.route('/user')
-        //adds a new user
+            //adds a new user
             .post(function (req, res, next) {
                 _that.newUser(req, res, next);
             })
 
         this.router.route('/user/:id')
-        //edit user
+            //edit user
             .put(function (req, res, next) {
                 _that.updateUser(req, res, next)
             })
@@ -202,7 +199,7 @@ module.exports = new Krouter({
 
 
         this.router.route('/user/passwordset/:id')
-        //update an user pass
+            //update an user pass
             .put(function (req, res, next) {
                 _that.passwordSet(req, res, next)
             });
@@ -214,21 +211,24 @@ module.exports = new Krouter({
          _that.getUser(req, res, next);
          });*/
         this.router.route('/users/:guess')
-        //retrive a limited user list based on the guess
+            //retrive a limited user list based on the guess
             .get(function (req, res, next) {
                 _that.getFiltredUsers(req, res, next);
             });
 
-/*
-        this.router.route('/users') //this route should be avoided
-        //retrive all the system users
-            .get(
-                function (req, res, next) {
-                    _that.getUsers(req, res, next)
-                })
-                */
+        /*
+         this.router.route('/users') //this route should be avoided
+         //retrive all the system users
+         .get(
+         function (req, res, next) {
+         _that.getUsers(req, res, next)
+         })
+         */
+
+
+
+
     }
 
 
-})
-;
+});

@@ -7,15 +7,15 @@ var Promise = require('bluebird');
 var bcrypt = Promise.promisifyAll(require('bcrypt'));
 var saltrounds = 10;
 const THIRD_PARTY_CREATED_USER_PASSWORD_STATUS = 'WFUSRTCH';
-const SELF_CREATED_USER_PASSWORD_STATUS = 'USRCHANGED';
-const NEW_USER_STATUS = 'pending';
+const SELF_CREATED_USER_PASSWORD_STATUS = 'active';
+const NEW_USER_STATUS = 'inactive';
 var utils = require('../utils/kaman_utils');
 var simple_select = 'select id, username, first_name,  last_name, password_status_id, status_id from  user  where ';
 //each method should return a promise
 module.exports = new Model({
 
     schema: 'user',
-    publicFields: ['id', 'username', 'first_name', 'last_name', 'status_id', 'password_status_id'],
+    publicFields: ['id', 'username', 'first_name', 'last_name', 'status_id', 'temp_password','password_status_id'],
     fields: ['id', 'username','password', 'first_name', 'last_name', 'status_id', 'password_status_id'],
     listLimit: 100,
     //justreturn an object with the body val
@@ -89,6 +89,7 @@ module.exports = new Model({
         if (user.password && user.username) {
             return this._hashPass(user.password)
                 .then(function (pass) {
+                    user.temp_password = user.password;
                     user.password = pass;
                     user.status_id = NEW_USER_STATUS;
                     user.password_status_id = THIRD_PARTY_CREATED_USER_PASSWORD_STATUS;
@@ -192,6 +193,7 @@ module.exports = new Model({
             .limit(this.listLimit);
 
     },
+
 
     getBy: function (criteria, key_value) {
         var valids = ['username', 'id'];
