@@ -38,7 +38,8 @@ module.exports = new Krouter({
         this.model.users
             .find(req.params.guess)
             .then(function (rows) {
-                res.status(200).json(rows);
+                console.log(rows)
+                res.status(200).json(rows)
             })
             .catch(function (err) {
                 res.status(500).json(err);
@@ -57,8 +58,20 @@ module.exports = new Krouter({
                 console.log(err)
             })
     },
-    //retrive a user from the collection but just one acording a criteria
+    //retrive a user from the collection but just one acording a db field
     getUser: function (req, res, next) {
+
+        this.model.users
+            ._getUserById(req.params.id)
+            .then(function (rows) {
+                res.status(200).json(rows)
+            })
+            .catch(function (err) {
+                res.status(500).json(err)
+            })
+    },
+    //retrive a full user info  from the collection but just one acording a db field
+    getFullUser: function (req, res, next) {
 
         this.model.users
             ._getUserById(req.params.id)
@@ -216,6 +229,7 @@ module.exports = new Krouter({
                 _that.getFiltredUsers(req, res, next);
             });
 
+
         /*
          this.router.route('/users') //this route should be avoided
          //retrive all the system users
@@ -224,8 +238,6 @@ module.exports = new Krouter({
          _that.getUsers(req, res, next)
          })
          */
-
-
 
 
     }

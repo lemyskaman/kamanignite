@@ -13,6 +13,17 @@ module.exports = {
         })
         return result;
     },
+    objectExcludeFilter: function (obj, invalid_keys) {
+        var result = {};
+        _.each(obj.keys, function (element, index, list) {
+            if (obj[element]) {
+                result[element] = obj[element];
+            }
+        })
+        return result;
+    },
+
+
 
     isEmpty: function (obj) {
         for (var prop in obj

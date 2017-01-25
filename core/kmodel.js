@@ -22,6 +22,14 @@ module.exports = function (opt) {
 };
 
 module.exports.prototype = {
+    rawFieldsAliases:function(obj){
+        var toReturnArr= _.map(obj,function(value,key,list){
+            return key+' as '+ value;
+        },this)
+
+        return knex.raw(toReturnArr.toString());
+    },
+    knex:knex,
     extend: function (child) {
         return _.extend({}, this, child);
     }

@@ -8,15 +8,18 @@ var bcrypt = Promise.promisifyAll(require('bcrypt'));
 var saltrounds = 10;
 const THIRD_PARTY_CREATED_USER_PASSWORD_STATUS = 'WFUSRTCH';
 const SELF_CREATED_USER_PASSWORD_STATUS = 'active';
-const NEW_USER_STATUS = 'inactive';
+const NEW_USER_STATUS = 'deactivated';
+
 var utils = require('../utils/kaman_utils');
 var simple_select = 'select id, username, first_name,  last_name, password_status_id, status_id from  user  where ';
 //each method should return a promise
 module.exports = new Model({
 
     schema: 'user',
-    publicFields: ['id', 'username', 'first_name', 'last_name', 'status_id', 'temp_password','password_status_id'],
-    fields: ['id', 'username','password', 'first_name', 'last_name', 'status_id', 'password_status_id'],
+    userValidSatus: ['active', 'deactivated'],
+    passwordValidSatus: [THIRD_PARTY_CREATED_USER_PASSWORD_STATUS, SELF_CREATED_USER_PASSWORD_STATUS],
+    publicFields: ['id', 'username', 'first_name', 'last_name', 'status_id', 'temp_password', 'password_status_id'],
+    fields: ['id', 'username', 'password', 'first_name', 'last_name', 'status_id', 'temp_password', 'password_status_id'],
     listLimit: 100,
     //justreturn an object with the body val
     _reqBodyAtr: function (req) {
@@ -71,12 +74,12 @@ module.exports = new Model({
     _getById: function (id) {
         return this.reader.select(this.publicFields).from('user').where('id', id);
     },
-    _getByUsername : function(username){
-        
+    _getByUsername: function (username) {
+
         return this.reader
             .select(this.fields)
             .from('user')
-            .where('username',  username )
+            .where('username', username)
             .limit(1)
     },
 
@@ -105,7 +108,6 @@ module.exports = new Model({
     },
 
 
- 
     updateUser: function (user) {
 
 
@@ -123,28 +125,28 @@ module.exports = new Model({
     },
 
     updatePass: function (user) {
-        var _that=this;
+        var _that = this;
         console.log(user);
         if (user.password && user.id) {
 
-            var uuser = utils.objectFilter(user, [ 'password']);
+            var uuser = utils.objectFilter(user, ['password']);
 
             uuser.password_status_id = THIRD_PARTY_CREATED_USER_PASSWORD_STATUS;
-            uuser.password = user.password; 
+            uuser.password = user.password;
             return this._hashPass(user.password)
                 .then(function (pass) {
                     uuser.password = pass;
 
                     return _that.writer('user')
                         .update(uuser, Object.keys(uuser))
-                        .where('id',user.id)
+                        .where('id', user.id)
                 })
 
-        }else{
+        } else {
             return Promise.reject({error: 'invalid request data '})
         }
     },
-    
+
     selfUpdate: function (user) {
 
         var uuser = utils.objectFilter(user, ['first_name', 'last_name']);
@@ -152,12 +154,12 @@ module.exports = new Model({
         return this.updateUser(uuser);
     },
 
-    selfUpdatePass: function(user){
-        var _that=this;
+    selfUpdatePass: function (user) {
+        var _that = this;
         console.log(user);
         if (user.password && user.id) {
 
-            var uuser = utils.objectFilter(user, [ 'password']);
+            var uuser = utils.objectFilter(user, ['password']);
 
             uuser.password = SELF_CREATED_USER_PASSWORD_STATUS;
             return this._hashPass(user.password)
@@ -166,21 +168,44 @@ module.exports = new Model({
 
                     return _that.writer('user')
                         .update(uuser, Object.keys(uuser))
-                        .where('id',user.id)
+                        .where('id', user.id)
                 })
 
-        }else{
+        } else {
             return Promise.reject({error: 'invalid request data '})
         }
     },
 
     find: function (guess) {
+        //console.log(this.rawSelect({'user.id': 'id', 'user.field': 'field'}))
+
+
         return this.reader
-            .select(this.publicFields)
+            //['id', 'username', 'first_name', 'last_name', 'status_id']
+            /*  .select(this.knex.raw('user.id as id,' +
+             ' user.username as username, ' +
+             'user.first_name as first_name, ' +
+             'user.last_name as last_name, ' +
+             'user.status_id as status_id,' +
+             'status.name as status_name,' +
+             'pass_status.id as password_status_id,' +
+             'pass_status.name as password_status_name '))*/
+            .select(this.rawFieldsAliases({
+                'user.id': 'id',
+                'user.username': 'username',
+                'user.first_name': 'first_name',
+                'user.last_name': 'last_name',
+                'user.status_id': 'status_id',
+                'status.name': 'status_name',
+                'pass_status.id': 'password_status_id',
+                'pass_status.name': 'password_status_name'
+            }))
             .from('user')
-            .where('username', 'like', '%' + guess + '%')
-            .orWhere('first_name', 'like', '%' + guess + '%')
-            .orWhere('last_name', 'like', '%' + guess + '%')
+            .leftJoin('status', 'user.status_id', 'status.id')
+            .leftJoin(this.knex.raw('status as pass_status'), 'user.password_status_id', 'pass_status.id')
+            .where('user.username', 'like', '%' + guess + '%')
+            .orWhere('user.first_name', 'like', '%' + guess + '%')
+            .orWhere('user.last_name', 'like', '%' + guess + '%')
             .limit(this.listLimit)
 
     },
@@ -209,7 +234,7 @@ module.exports = new Model({
         }
 
 
-    }
+    },
 
 
 })
