@@ -18,9 +18,136 @@ module.exports = new Model({
     schema: 'user',
     userValidSatus: ['active', 'deactivated'],
     passwordValidSatus: [THIRD_PARTY_CREATED_USER_PASSWORD_STATUS, SELF_CREATED_USER_PASSWORD_STATUS],
+
+    fieldsAliases: {
+        'user.id': 'id',
+        'user.username': 'username',
+        'user.first_name': 'first_name',
+        'user.last_name': 'last_name',
+        'user.status_id': 'status_id',
+        'status.name': 'status_name',
+        'password_status.id': 'password_status_id',
+        'user.tem_password': 'temp_password',
+        'password_status.name': 'password_status_name'
+    },
+    //--Read Only ends
+
+
     publicFields: ['id', 'username', 'first_name', 'last_name', 'status_id', 'temp_password', 'password_status_id'],
     fields: ['id', 'username', 'password', 'first_name', 'last_name', 'status_id', 'temp_password', 'password_status_id'],
+
+
     listLimit: 100,
+
+
+    //new set
+
+    //retrive a list with a portion of user fields which values match like the guess param
+    find: function (guess) {
+
+        return this.reader
+
+            .select(this.rawFieldsAliases({
+                'user.id': 'id',
+                'user.username': 'username',
+                'user.first_name': 'first_name',
+                'user.last_name': 'last_name',
+                'user.status_id': 'status_id',
+                'status.name': 'status_name'
+            }))
+            .from('user')
+            .leftJoin('status', 'user.status_id', 'status.id')
+            .leftJoin(this.knex.raw('status as password_status'), 'user.password_status_id', 'password_status.id')
+            .where('user.username', 'like', '%' + guess + '%')
+            .orWhere('user.id', 'like', '%' + guess + '%')
+            .orWhere('user.first_name', 'like', '%' + guess + '%')
+            .orWhere('user.last_name', 'like', '%' + guess + '%')
+            .limit(this.listLimit)
+
+    },
+    //retrives a full field list of users acording matched fields with
+    fullFind: function () {
+        this.reader
+            .select(this.rawFieldsAliases(this.fieldsAliases))
+            .from('user')
+            .leftJoin('status', 'user.status_id', 'status.id')
+            .leftJoin(this.knex.raw('status as password_status'), 'user.password_status_id', 'password_status.id')
+            .where('user.username', 'like', '%' + guess + '%')
+            .orWhere('user.id', 'like', '%' + guess + '%')
+            .orWhere('user.first_name', 'like', '%' + guess + '%')
+            .orWhere('user.last_name', 'like', '%' + guess + '%')
+            .limit(this.listLimit)
+    },
+    _getById: function (id) {
+        this.reader
+            .select(this.rawFieldsAliases(this.fieldsAliases))
+            .from('user')
+            .leftJoin('status', 'user.status_id', 'status.id')
+            .leftJoin(this.knex.raw('status as pass_status'), 'user.password_status_id', 'pass_status.id')
+            .where('user.id', id)
+            .limit(1)
+    },
+    _getByUsername: function (username) {
+
+        this.reader
+            .select(this.rawFieldsAliases(this.fieldsAliases))
+            .from('user')
+            .leftJoin('status', 'user.status_id', 'status.id')
+            .leftJoin(this.knex.raw('status as pass_status'), 'user.password_status_id', 'pass_status.id')
+            .where('user.username', username)
+            .limit(1)
+    },
+
+    add: function (user) {
+        var _that = this;
+
+        if (user.password && user.username) {
+            return this._hashPass(user.password)
+                .then(function (pass) {
+                    user.temp_password = user.password;
+                    user.password = pass;
+                    user.status_id = NEW_USER_STATUS;
+                    user.password_status_id = THIRD_PARTY_CREATED_USER_PASSWORD_STATUS;
+                    //next should return fields but is not doing it
+                    //it only returns the new user id  iguess is something related to mysql
+                    //more than knexjs
+                    return _that.writer('user').retur_reqBodyAtrning(this.fields).insert(user);
+                })
+
+        } else {
+            return Promise.reject({code: 'missing_username_or_password'})
+        }
+    },
+    edit: function (user) {
+        if (user.id) {
+
+
+            var uuser={}
+            if (user.password) {
+               uuser= _.chain(user)
+                   //select only valid fields
+                   .pick(user,this.fields)
+                   //remove temp_password value
+                   .omit(uuser,'temp_password')
+
+                uuser.password=this._hashPass(user.password);
+                uuser.password_status_id='active';
+            } else if (user.password_status_id===) {
+               uuser=_.pick(user,this.fields)
+            }
+
+
+            return this.writer('user')
+                //update only filtred user object fields
+                .update(uuser, Object.keys(uuser))
+                .where('id', user.id)
+
+        } else {
+            return Promise.reject({error: 'user data id cant be null '})
+        }
+    },
+
+
     //justreturn an object with the body val
     _reqBodyAtr: function (req) {
         var fields = this.fields;
@@ -71,17 +198,6 @@ module.exports = new Model({
         return text;
     },
 
-    _getById: function (id) {
-        return this.reader.select(this.publicFields).from('user').where('id', id);
-    },
-    _getByUsername: function (username) {
-
-        return this.reader
-            .select(this.fields)
-            .from('user')
-            .where('username', username)
-            .limit(1)
-    },
 
     _hashPass: function (pass) {
         return bcrypt.hashAsync(pass, saltrounds)
@@ -99,11 +215,11 @@ module.exports = new Model({
                     //next should return fields but is not doing it
                     //it only returns the new user id  iguess is something related to mysql
                     //more than knexjs
-                    return _that.writer('user').returning(this.fields).insert(user);
+                    return _that.writer('user').retur_reqBodyAtrning(this.fields).insert(user);
                 })
 
         } else {
-            return Promise.reject({error: 'username or password value is missing'})
+            return Promise.reject({code: 'missing_username_or_password'})
         }
     },
 
@@ -176,39 +292,7 @@ module.exports = new Model({
         }
     },
 
-    find: function (guess) {
-        //console.log(this.rawSelect({'user.id': 'id', 'user.field': 'field'}))
 
-
-        return this.reader
-            //['id', 'username', 'first_name', 'last_name', 'status_id']
-            /*  .select(this.knex.raw('user.id as id,' +
-             ' user.username as username, ' +
-             'user.first_name as first_name, ' +
-             'user.last_name as last_name, ' +
-             'user.status_id as status_id,' +
-             'status.name as status_name,' +
-             'pass_status.id as password_status_id,' +
-             'pass_status.name as password_status_name '))*/
-            .select(this.rawFieldsAliases({
-                'user.id': 'id',
-                'user.username': 'username',
-                'user.first_name': 'first_name',
-                'user.last_name': 'last_name',
-                'user.status_id': 'status_id',
-                'status.name': 'status_name',
-                'pass_status.id': 'password_status_id',
-                'pass_status.name': 'password_status_name'
-            }))
-            .from('user')
-            .leftJoin('status', 'user.status_id', 'status.id')
-            .leftJoin(this.knex.raw('status as pass_status'), 'user.password_status_id', 'pass_status.id')
-            .where('user.username', 'like', '%' + guess + '%')
-            .orWhere('user.first_name', 'like', '%' + guess + '%')
-            .orWhere('user.last_name', 'like', '%' + guess + '%')
-            .limit(this.listLimit)
-
-    },
     // will retrive a promise for the listLimit last elements
     getThem: function () {
         return this.reader

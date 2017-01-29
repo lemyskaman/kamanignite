@@ -114,7 +114,8 @@ module.exports = new Krouter({
             .catch(function (err) {
                 console.log('register User catch error', err)
                 //err.error='error creating user'
-                res.status(500).json(err)
+                err.origin='users.route'
+                res.status(500).json({error:err})
             })
 
 
@@ -189,6 +190,15 @@ module.exports = new Krouter({
     setEndPoints: function () {
         var _that = this
 
+
+        this.router.route('/user/:id')
+            //edit user
+            .put(function (req, res, next) {
+                _that.updateUser(req, res, next)
+            })
+
+
+
         this.router.route('/me')
             .put(function (req, res, next) {
 
@@ -196,19 +206,20 @@ module.exports = new Krouter({
 
         this.router.route('/user')
             //adds a new user
-            .post(function (req, res, next) {
+            .post(function (req, res, next){
+                next()
+                /*
+                res.status(401).json({
+                    error: {
+                        origin: 'activeUserVerify.middleware',
+                        message: 'User on token is not active'
+                    }
+                })*/
+            },function (req, res, next) {
                 _that.newUser(req, res, next);
             })
 
-        this.router.route('/user/:id')
-            //edit user
-            .put(function (req, res, next) {
-                _that.updateUser(req, res, next)
-            })
-            //get user by id
-            .get(function (req, res, next) {
-                _that.getUser(req, res, next);
-            });
+
 
 
         this.router.route('/user/passwordset/:id')
