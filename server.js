@@ -47,7 +47,7 @@ app.use(favicon(__dirname + '/static/assets/favicon.png'));
 app.use('/static', express.static('static/'));
 
 //a front end html/javascript magic will  delivered from here
-app.use(routes.index.getRouter());
+app.use(routes.index._getRouter());
 
 
 //system statues
@@ -66,7 +66,7 @@ app.use('/sys_status',function(req,res){
 
 
 //authentication its out side from verifyig middleware
-app.use('/resources', routes.auth.getRouter());
+app.use('/resources', routes.auth._getRouter());
 
 //an authenticated user is mandatory after this middleware
 app.use(function(req,res,next){
@@ -74,7 +74,10 @@ app.use(function(req,res,next){
     next();
 });
 
-app.use('/resources', routes.users.getRouter());
+
+
+app.use('/resources', routes.users._getRouter());
+
 
 
 
@@ -93,4 +96,4 @@ process.on('SIGTERM', function () {
 // listen for INT signal e.g. Ctrl-C
 process.on('SIGINT', function () {
     utils.gracefulShutdown(server);
-});
+});//cron testing
