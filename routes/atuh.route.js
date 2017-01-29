@@ -21,20 +21,26 @@ module.exports = new Krouter({
         users: usersModel
     },
     _passwordCompare: function(test, hash) {
+        console.log('------password compare')
         console.log(test, hash);
         return bcrypt.compareAsync(test, hash);
     },
     _authFail: function(res) {
         res.status(401).json({
             error: {
-                auth: false,
-                message: 'non_valid_user_or_pass'
+                origin: 'auth.route',
+                code: 'non_valid_user_or_pass'
             }
         })
     },
     authenticate: function(req, res, next) {
         var _that = this;
-        var reqUser = this.model.users._reqBodyAtr(req);
+        //var reqUser = this.model.users._reqBodyAtr(req);
+        var reqUser=req.body;
+
+        console.log('--------req',req.body);
+        console.log('--------reqUser',reqUser);
+
         var matchedUser = {};
 
         var userRetriving = {},
@@ -45,25 +51,26 @@ module.exports = new Krouter({
         userRetriving
             .then(function(users) { //if a correct db connection and query
                 var success = 0;
-                if (users.length === 1) { //if we find a user
+                if (users.length === 1) { //if we find a user and only one user
                     matchedUser = users[0];
                     console.log('auth req user:')
                     console.log(reqUser);
                     console.log('auth db user')
                     console.log(matchedUser);
+
+
                     _that._passwordCompare(reqUser.password, matchedUser.password)
                         .then(function(check) {
                             if (check === true) { //if passwor match with db pass
-                                console.log('jwt user');
-                                console.log(utils.objectFilter(matchedUser, _that.model.users.publicFields));
-                                console.log('secret');
-                                console.log(_that.config.get('secret'));
-                                return jwt.signAsync(
-                                    utils.objectFilter(matchedUser, _that.model.users.publicFields),
+                                console.log('-----jwt user');
+                                console.log('-----token generation');
+                                console.log('-----matchedUser',matchedUser);
+                                console.log('-----secret',_that.config.get('secret'));
+                                return jwt.signAsync(matchedUser,
                                     _that.config.get('secret'), {
                                         algorithm: 'HS256',
                                         expiresIn: _that.config.get('tokenExpiration')
-                                    });
+                                    })
 
                                 //res.status(200).json(utils.objectFilter(users[0], _that.model.users.publicFields));
                             } else { //passwor dont match the user o db

@@ -4,16 +4,16 @@
 var util = require('util');
 var kmiddleware = require("./../core/kmiddleware");
 var jwt = require('jsonwebtoken');
+var usersModel=require('./../models/users.model.js');
 
 
 module.exports = new kmiddleware({
 
-    _tokenFail:function(res){
-
+    _activeUserFail:function(res){
         return res.status(401).json({
-            error: {
-                origin: 'tokenVerify.middleware',
-                message: 'no token provided or Failed to authenticate token.'
+            auth:{
+                success:false,
+                message:'no token provided or Failed to authenticate token. '
             }
         })
     },
@@ -29,7 +29,7 @@ module.exports = new kmiddleware({
             // verifies secret and checks exp
             jwt.verify(token, _that.config.get('secret'), function (err, decoded) {
                 if (err) {
-                    _that._tokenFail(res);
+                    _that._authFail(res);
                 } else {
                     // if everything is good, save to request for use in other routes
                     req.decoded = decoded;
@@ -41,7 +41,7 @@ module.exports = new kmiddleware({
 
             // if there is no token
             // return an error
-            _that._tokenFail(res);
+            _that._authFail(res);
         }
 
 

@@ -1,5 +1,6 @@
 var Krouter = require("./../core/krouter");
 var _ = require("underscore");
+var traceback = require('traceback');
 var basicAuth = require('basic-auth');
 
 var Promise = require('bluebird');
@@ -14,8 +15,45 @@ var userVerifyMiddleware = require('../middlewares/tokenVerify.middleware.js');
 
 module.exports = new Krouter({
 
+    name:'users',
     model: {
         users: usersModel
+    },
+
+    //overwrites or adds req.params properties to req.body object
+    _reqParamsToBody: function (req) {
+
+        _.each(req.params, function (value, key) {
+
+            req.body[key] = req.params[key]
+        }, this)
+        return req;
+    },
+    //usefull to create a random pass for users
+    _randomPassString: function () {
+        var text = "";
+
+
+        var uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        var simbols = '*-_.$#';
+        var lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        var numbers = "0123456789";
+
+        //ramdompass start with 3 letters
+        var possible = uppercase + lowercase;
+        for (var i = 0; i < 2; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        //continue with one simbol
+        var possible = simbols
+        for (var i = 0; i < 1; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        //and ends with a ramdom
+        var possible = simbols + numbers + uppercase + lowercase;
+        for (var i = 0; i < 3; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        return text;
     },
 
 
@@ -114,8 +152,8 @@ module.exports = new Krouter({
             .catch(function (err) {
                 console.log('register User catch error', err)
                 //err.error='error creating user'
-                err.origin='users.route'
-                res.status(500).json({error:err})
+                err.origin = 'users.route'
+                res.status(500).json({error: err})
             })
 
 
@@ -168,22 +206,46 @@ module.exports = new Krouter({
             })
 
     },
-    selfPasswordSet: function (req, res, next) {
 
-        var user = this.this.model.users._reqBodyAtr(this._emptyPasswordFix(req));
 
-        this.model.users
-            .selfUpdatePass(user)
-            .then(function (rows) {
-                user.password = req.body.password;
-                res.status(200).json(user);
+
+
+
+
+
+
+    //update only validFields of user data
+    update: function (req, res, next) {
+        var _that = this;
+
+        var validFields = ['id', 'first_name', 'last_name', 'password_status_id']
+        req = this._reqParamsToBody(req);
+
+        var dataToUpdate = _.pick(req.body, validFields)
+        this.model.users.update(dataToUpdate)
+            .then(function (affected_rows) {
+
+                if (affected_rows > 0) {
+
+                    _that._jsonResponse(res,200,'successful_user_update',dataToUpdate)
+                } else {
+                    //not found
+                    _that._jsonResponse(res,400,'successful_user_update',dataToUpdate)
+
+                }
             })
             .catch(function (err) {
-                //onsole.log('register User catch error',err)
-                res.status(500).json(err)
+                _that._errorResponse(res, 'model_error', , input: dataToUpdate})
             })
 
+
+        //res.status(200).json();
+
+
     },
+
+
+
 
 
     /*-----------Mandatory----------*/
@@ -191,13 +253,30 @@ module.exports = new Krouter({
         var _that = this
 
 
+
+
+
         this.router.route('/user/:id')
             //edit user
             .put(function (req, res, next) {
-                _that.updateUser(req, res, next)
+                _that.update(req, res, next)
             })
 
-
+        this.router.route('/users/:guess')
+            //retrive a limited user list based on the guess
+            .get(function (req, res, next) {
+                _that.model.users
+                    .find(req.params.guess)
+                    .then(function (rows) {
+                        console.log(rows)
+                        this._successResponse(res,'succesfull_users_guess_fetch',rows);
+                    })
+                    .catch(function (err) {
+                        res.status(500).json(err);
+                        console.log(err)
+                        this._successResponse(res,'failed_users_guess_fetch',{error:err,});
+                    })
+            });
 
         this.router.route('/me')
             .put(function (req, res, next) {
@@ -206,20 +285,18 @@ module.exports = new Krouter({
 
         this.router.route('/user')
             //adds a new user
-            .post(function (req, res, next){
+            .post(function (req, res, next) {
                 next()
                 /*
-                res.status(401).json({
-                    error: {
-                        origin: 'activeUserVerify.middleware',
-                        message: 'User on token is not active'
-                    }
-                })*/
-            },function (req, res, next) {
+                 res.status(401).json({
+                 error: {
+                 origin: 'activeUserVerify.middleware',
+                 message: 'User on token is not active'
+                 }
+                 })*/
+            }, function (req, res, next) {
                 _that.newUser(req, res, next);
             })
-
-
 
 
         this.router.route('/user/passwordset/:id')
@@ -234,11 +311,6 @@ module.exports = new Krouter({
          .get(function (req, res, next) {
          _that.getUser(req, res, next);
          });*/
-        this.router.route('/users/:guess')
-            //retrive a limited user list based on the guess
-            .get(function (req, res, next) {
-                _that.getFiltredUsers(req, res, next);
-            });
 
 
         /*
@@ -254,4 +326,5 @@ module.exports = new Krouter({
     }
 
 
-});
+})
+;

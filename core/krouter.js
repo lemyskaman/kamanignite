@@ -19,12 +19,21 @@ module.exports = function (opt) {
     }, self);
 
 
-
     //todo: build a seter to fill this var and also a initial value checker
     // this.routes = opt.routes
+    console.log('krouter', this.name);
+    console.log(this);
 };
 
 module.exports.prototype = {
+
+    _jsonResponse: function (res, httpStatusCode, msg, data) {
+        var responseJson = {};
+        responseJson.data = data;
+        responseJson.message= msg;
+        res.status(httpStatusCode).json(responseJson)
+    },
+
 
 
     extend: function (child) {
@@ -33,8 +42,9 @@ module.exports.prototype = {
     run: function (req, res, next) {
         console.log('base run');
     },
-    setEndPoints: function () {},
-    getRouter:function(){
+    setEndPoints: function () {
+    },
+    _getRouter: function () {
         this.setEndPoints();
         return this.router;
     }
