@@ -235,7 +235,38 @@ module.exports = new Krouter({
                 }
             })
             .catch(function (err) {
-                _that._errorResponse(res, 'model_error', , input: dataToUpdate})
+                _that._jsonResponse(res,500, 'model_error', {error:err,input:dataToUpdate})
+            })
+
+
+        //res.status(200).json();
+
+
+    },
+
+
+    //update only validFields of user data
+    put_user: function (id,req, res, next) {
+        var _that = this;
+
+        var validFields = ['id', 'first_name', 'last_name', 'password_status_id']
+        req = this._reqParamsToBody(req);
+
+        var dataToUpdate = _.pick(req.body, validFields)
+        this.model.users.update(dataToUpdate)
+            .then(function (affected_rows) {
+
+                if (affected_rows > 0) {
+
+                    _that._jsonResponse(res,200,'successful_user_update',dataToUpdate)
+                } else {
+                    //not found
+                    _that._jsonResponse(res,400,'successful_user_update',dataToUpdate)
+
+                }
+            })
+            .catch(function (err) {
+                _that._jsonResponse(res,500, 'model_error', {error:err,input:dataToUpdate})
             })
 
 
@@ -255,12 +286,15 @@ module.exports = new Krouter({
 
 
 
-
-        this.router.route('/user/:id')
-            //edit user
+/*
+        this.router.route('/user/:id')          //edit user
             .put(function (req, res, next) {
                 _that.update(req, res, next)
             })
+        this.router.route('/user/:id')          //edit user
+            .get(function (req, res, next) {
+                _that._jsonResponse(res,200,'bien',{})
+            })*/
 
         this.router.route('/users/:guess')
             //retrive a limited user list based on the guess

@@ -20,6 +20,12 @@ var userVerifyMiddleware = require('./middlewares/tokenVerify.middleware.js');
 var config = new Configuration();
 var app = express();
 
+
+
+
+
+
+
 app.use(bodyParser.urlencoded({
     extended: true
 }));
