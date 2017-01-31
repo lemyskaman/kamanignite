@@ -71,10 +71,11 @@ module.exports = new Krouter({
     },
 
 
-    //retrive users from collection acordign a guess
-    getFiltredUsers: function (req, res, next) {
+    //retrive users from collection according a guess
+    get_users_by_guess: function (guess,req, res, next) {
+        console.log('from user router guess:' +guess)
         this.model.users
-            .find(req.params.guess)
+            .find(guess)
             .then(function (rows) {
                 console.log(rows)
                 res.status(200).json(rows)

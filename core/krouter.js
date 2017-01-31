@@ -43,11 +43,11 @@ module.exports.prototype = {
         //we add to routeString the httparams that dosent match with function
         //req res or next param
         _.each(paramNames, function (element, key, list) {
-
             if (element !== 'req' && element !== 'res' && element !== 'next') {
                 routeString = routeString + '/:' + element;
             }
         })
+
         return routeString
     },
     _fnParamsValues: function (req, res, next, paramNames) {
@@ -68,15 +68,16 @@ module.exports.prototype = {
 
                 //we assume the other params are just http get params
                 default :
-                    console.log('inside loop swicth', req.params)
-                    fnParamValues[key] = req.params[key]
+
+                    fnParamValues[key] = req.params[element]
                     break;
             }
 
         }, this);
+
         return fnParamValues;
     },
-
+    //an this does the magic for routers
     _routerSeter: function (fnName, fn) {
 
         var _that = this;
@@ -88,14 +89,49 @@ module.exports.prototype = {
 
         switch (httpMethod) {
             case 'put':
-                console.log(httpMethod)
+                console.log('-----------Method:' + httpMethod);
+                console.log('-----------urlString:' + this._routeString(splitedFnName, paramNames));
                 var paramNames = this._getFnParamNames(fn)
+
                 this.router.route(this._routeString(splitedFnName, paramNames))
                     .put(function (req, res, next) {
                         //the we call the function and aply its arguments with values
                         _that[fnName].apply(_that, _that._fnParamsValues(req, res, next, paramNames));
                     });
                 break;
+            case 'get':
+
+
+                var paramNames = this._getFnParamNames(fn)
+                console.log('-----------Method:' + httpMethod);
+                console.log('-----------urlString:' + this._routeString(splitedFnName, paramNames));
+                this.router.route(this._routeString(splitedFnName, paramNames))
+                    .get(function (req, res, next) {
+                        //the we call the function and aply its arguments with values
+                        _that[fnName].apply(_that, _that._fnParamsValues(req, res, next, paramNames));
+                    });
+                break;
+            case 'post':
+                console.log('-----------Method:' + httpMethod);
+                console.log('-----------urlString:' + this._routeString(splitedFnName, paramNames));
+                var paramNames = this._getFnParamNames(fn)
+                this.router.route(this._routeString(splitedFnName, paramNames))
+                    .post(function (req, res, next) {
+                        //the we call the function and aply its arguments with values
+                        _that[fnName].apply(_that, _that._fnParamsValues(req, res, next, paramNames));
+                    });
+                break;
+            case 'delete':
+                console.log('-----------Method:' + httpMethod);
+                console.log('-----------urlString:' + this._routeString(splitedFnName, paramNames));
+                var paramNames = this._getFnParamNames(fn)
+                this.router.route(this._routeString(splitedFnName, paramNames))
+                    .delete(function (req, res, next) {
+                        //the we call the function and aply its arguments with values
+                        _that[fnName].apply(_that, _that._fnParamsValues(req, res, next, paramNames));
+                    });
+                break;
+
         }
 
 
@@ -112,13 +148,9 @@ module.exports.prototype = {
     extend: function (child) {
         return _.extend({}, this, child);
     },
-    run: function (req, res, next) {
-        console.log('base run');
-    },
-    setEndPoints: function () {
-    },
+
     _getRouter: function () {
-        this.setEndPoints();
+
         return this.router;
     }
 
