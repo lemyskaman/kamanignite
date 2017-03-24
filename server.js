@@ -43,8 +43,13 @@ routes.users = require('./routes/users.route.js');
 routes.auth = require('./routes/atuh.route.js');
 
 
-
-
+app.use( function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  
+  res.header('Access-Control-Allow-Headers', 'x-access-token, Content-Type, Authorization, Content-Length, X-Requested-With');
+  res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
+ next();
+});
 
 //icon
 app.use(favicon(__dirname + '/static/assets/favicon.png'));
@@ -52,23 +57,14 @@ app.use(favicon(__dirname + '/static/assets/favicon.png'));
 // for production enviorment ngix is recomendable to do this job
 app.use('/static', express.static('static/'));
 
+
+
+
+
+
+
 //a front end html/javascript magic will  delivered from here
-app.use(routes.index._getRouter());
-
-
-//system statues
-
-app.use('/sys_status',function(req,res){
-    statusModel
-        .getThem()
-        .then(function (rows) {
-            res.status(200).json(rows)
-        })
-        .catch(function (err) {
-            res.status(500).json(err)
-        })
-})
-
+app.use('/resources',routes.index._getRouter());
 
 
 //authentication its out side from verifyig middleware

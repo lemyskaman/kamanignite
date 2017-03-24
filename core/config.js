@@ -33,7 +33,7 @@ module.exports.prototype = {
     },
     setvalues: function () {
         if (utils.isEmpty(this.values))
-            this.values = require('../config/' + this.getMode() + '.conf');
+            this.values = require('../config/' + this.getMode() + '.js');
     },
     setCmdLineArgs: function () {
         //the main idea is to walk the process.argv finding

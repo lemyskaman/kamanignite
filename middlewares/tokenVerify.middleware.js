@@ -5,8 +5,7 @@ var util = require('util');
 var kmiddleware = require("./../core/kmiddleware");
 var jwt = require('jsonwebtoken');
 
-
-module.exports = new kmiddleware({
+tokenVerify = new kmiddleware({
 
     _tokenFail:function(res){
 
@@ -49,3 +48,4 @@ module.exports = new kmiddleware({
 });
 
 
+module.exports = tokenVerify;

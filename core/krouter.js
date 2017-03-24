@@ -25,11 +25,12 @@ module.exports = function (opt) {
     //todo: build a seter to fill this var and also a initial value checker
     // this.routes = opt.routes
     console.log('krouter', this.name);
+    //this.setEndPoints()
     //console.log(this);
 };
 
 module.exports.prototype = {
-
+    setEndPoints:function(){},
     _getFnParamNames: function (fn) {
         var fstr = fn.toString();
         return fstr.match(/\(.*?\)/)[0].replace(/[()]/gi, '').replace(/\s/gi, '').split(',');
@@ -90,7 +91,7 @@ module.exports.prototype = {
         switch (httpMethod) {
             case 'put':
                 console.log('-----------Method:' + httpMethod);
-                console.log('-----------urlString:' + this._routeString(splitedFnName, paramNames));
+                console.log('-------------urlString:' + this._routeString(splitedFnName, paramNames));
                 var paramNames = this._getFnParamNames(fn)
 
                 this.router.route(this._routeString(splitedFnName, paramNames))
@@ -104,7 +105,7 @@ module.exports.prototype = {
 
                 var paramNames = this._getFnParamNames(fn)
                 console.log('-----------Method:' + httpMethod);
-                console.log('-----------urlString:' + this._routeString(splitedFnName, paramNames));
+                console.log('-------------urlString:' + this._routeString(splitedFnName, paramNames));
                 this.router.route(this._routeString(splitedFnName, paramNames))
                     .get(function (req, res, next) {
                         //the we call the function and aply its arguments with values
@@ -113,7 +114,7 @@ module.exports.prototype = {
                 break;
             case 'post':
                 console.log('-----------Method:' + httpMethod);
-                console.log('-----------urlString:' + this._routeString(splitedFnName, paramNames));
+                console.log('-------------urlString:' + this._routeString(splitedFnName, paramNames));
                 var paramNames = this._getFnParamNames(fn)
                 this.router.route(this._routeString(splitedFnName, paramNames))
                     .post(function (req, res, next) {
@@ -123,7 +124,7 @@ module.exports.prototype = {
                 break;
             case 'delete':
                 console.log('-----------Method:' + httpMethod);
-                console.log('-----------urlString:' + this._routeString(splitedFnName, paramNames));
+                console.log('-------------urlString:' + this._routeString(splitedFnName, paramNames));
                 var paramNames = this._getFnParamNames(fn)
                 this.router.route(this._routeString(splitedFnName, paramNames))
                     .delete(function (req, res, next) {

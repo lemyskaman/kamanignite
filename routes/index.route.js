@@ -24,9 +24,12 @@ module.exports = new Krouter({
     setEndPoints: function () {
         var that = this;
         this.router.route('/')
+
             .get(
+               
             //pass throug lang detect
             function (req, res, next) {
+                 console.log('main interface shold be dispĺayed');
                 res.lang = config.get('lang') || 'en';
                 next()
             },

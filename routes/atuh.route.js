@@ -17,6 +17,7 @@ var config = new Config();
 
 
 module.exports = new Krouter({
+    name: 'auth',
     model: {
         users: usersModel
     },
@@ -25,21 +26,14 @@ module.exports = new Krouter({
         console.log(test, hash);
         return bcrypt.compareAsync(test, hash);
     },
-    _authFail: function(res) {
-        res.status(401).json({
-            error: {
-                origin: 'auth.route',
-                code: 'non_valid_user_or_pass'
-            }
-        })
-    },
-    authenticate: function(req, res, next) {
+
+    put_authenticate: function(req, res, next) {
         var _that = this;
         //var reqUser = this.model.users._reqBodyAtr(req);
-        var reqUser=req.body;
+        var reqUser = req.body;
 
-        console.log('--------req',req.body);
-        console.log('--------reqUser',reqUser);
+        console.log('--------req', req.body);
+        console.log('--------reqUser', reqUser);
 
         var matchedUser = {};
 
@@ -64,8 +58,8 @@ module.exports = new Krouter({
                             if (check === true) { //if passwor match with db pass
                                 console.log('-----jwt user');
                                 console.log('-----token generation');
-                                console.log('-----matchedUser',matchedUser);
-                                console.log('-----secret',_that.config.get('secret'));
+                                console.log('-----matchedUser', matchedUser);
+                                console.log('-----secret', _that.config.get('secret'));
                                 return jwt.signAsync(matchedUser,
                                     _that.config.get('secret'), {
                                         algorithm: 'HS256',
@@ -75,7 +69,7 @@ module.exports = new Krouter({
                                 //res.status(200).json(utils.objectFilter(users[0], _that.model.users.publicFields));
                             } else { //passwor dont match the user o db
                                 console.log('authentication fail: password dont match user')
-                                _that._authFail(res)
+                                _that._jsonResponse(res, 401, 'non_valid_user_or_pass', {});
                             }
 
                         })
@@ -84,53 +78,52 @@ module.exports = new Krouter({
                             response.auth = true;
                             response.token = token;
 
-                            res.status(200).json(response)
+                            _that._jsonResponse(res, 200, 'authorized_user', response);
                         })
                         .catch(function(err) {
                             console.log('token generation error')
                             console.log(err)
-                            res.status(500).json({
-                                error: {
-                                    action: 'jwt.singAsync',
-                                    content: err
-                                }
-                            })
+                            _that._jsonResponse(res, 500, 'system error', {
+                                action: 'jwt.singAsync',
+                                content: err
+                            });
+
                         })
                         .catch(function(err) {
                             console.log('password compare error')
                             console.log(err)
-                            res.status(500).json({
-                                error: {
-                                    action: 'passwordCompare',
-                                    content: err
-                                }
-                            })
+                            that._jsonResponse(res, 500, 'system error', {
+                                action: 'passwordCompare',
+                                content: err
+                            });
                         })
                 } else { // user not found
                     console.log('authentication fail: user not found')
-                    _that._authFail(res);
+                    _that._jsonResponse(res, 401, 'non_valid_user_or_pass', {});
                 }
             })
             .catch(function(err) { //if mysql connection or mysql related error
+                console.log('mysql error')
                 console.log(err)
-                res.status(500).json({
-                    error: {
-                        action: '_getByUsername',
-                        content: err
-                    }
+
+                that._jsonResponse(res, 500, 'system error', {
+                    action: '_getByUsername',
+                    content: err
                 });
+
             });
 
 
     },
     setEndPoints: function() {
+        /*
         var _that = this;
         this.router.route('/authenticate')
             .put(function(req, res, next) {
-                _that.authenticate(req, res, next);
+                // _that.authenticate(req, res, next);
             })
 
-
+*/
     }
 
 });

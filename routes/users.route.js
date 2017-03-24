@@ -15,22 +15,22 @@ var userVerifyMiddleware = require('../middlewares/tokenVerify.middleware.js');
 
 module.exports = new Krouter({
 
-    name:'users',
+    name: 'users',
     model: {
         users: usersModel
     },
 
     //overwrites or adds req.params properties to req.body object
-    _reqParamsToBody: function (req) {
+    _reqParamsToBody: function(req) {
 
-        _.each(req.params, function (value, key) {
+        _.each(req.params, function(value, key) {
 
             req.body[key] = req.params[key]
         }, this)
         return req;
     },
     //usefull to create a random pass for users
-    _randomPassString: function () {
+    _randomPassString: function() {
         var text = "";
 
 
@@ -59,7 +59,7 @@ module.exports = new Krouter({
 
     //in case we have empty password value on boddy
     //we filli up with a model defult ramdon function for pass
-    _emptyPasswordFix: function (req) {
+    _emptyPasswordFix: function(req) {
         if (!req.body.password) {
             req.body.password = this.model.users._randomPassString();
             req.body.password_status_id = 'active'
@@ -72,60 +72,71 @@ module.exports = new Krouter({
 
 
     //retrive users from collection according a guess
-    get_users_by_guess: function (guess,req, res, next) {
-        console.log('from user router guess:' +guess)
+    get_users_by_guess: function(guess, req, res, next) {
+        var _that = this;
+        console.log('from user router guess:' + guess)
         this.model.users
             .find(guess)
-            .then(function (rows) {
-                console.log(rows)
-                res.status(200).json(rows)
+            .then(function(rows) {
+                console.log(rows);
+
+
+                if (rows.lenght > 0) {
+                    _that._jsonResponse(res, 200, 'almost a user was found', rows)
+                } else {
+                    _that._jsonResponse(res, 404, 'no user found', rows)
+                }
+
+
             })
-            .catch(function (err) {
-                res.status(500).json(err);
+            .catch(function(err) {
                 console.log(err)
+                _that._jsonResponse(res, 505, '', err)
+       
+                
             })
     },
-    getUsers: function (req, res, next) {
+    getUsers: function(req, res, next) {
 
         this.model.users
             .getThem()
-            .then(function (rows) {
+            .then(function(rows) {
                 res.status(200).json(rows);
             })
-            .catch(function (err) {
+            .catch(function(err) {
                 res.status(500).json(err);
                 console.log(err)
             })
     },
     //retrive a user from the collection but just one acording a db field
-    getUser: function (req, res, next) {
+    getUser: function(req, res, next) {
 
         this.model.users
             ._getUserById(req.params.id)
-            .then(function (rows) {
+            .then(function(rows) {
                 res.status(200).json(rows)
             })
-            .catch(function (err) {
+            .catch(function(err) {
                 res.status(500).json(err)
             })
     },
     //retrive a full user info  from the collection but just one acording a db field
-    getFullUser: function (req, res, next) {
+    getFullUser: function(req, res, next) {
 
         this.model.users
             ._getUserById(req.params.id)
-            .then(function (rows) {
+            .then(function(rows) {
                 res.status(200).json(rows)
             })
-            .catch(function (err) {
+            .catch(function(err) {
                 res.status(500).json(err)
             })
     },
 
 
     //neds a data check middleware
-    newUser: function (req, res, next) {
-
+    //newUser: function(req, res, next) {
+    post_add_user:function(req, res, next){
 
 
         //in case we have empty password value on boddy
@@ -140,35 +151,38 @@ module.exports = new Krouter({
 
 
         this.model.users
-            .addNewUser(user)
-            .then(function (rows) {
+            .add(user)
+            .then(function(rows) {
                 //at this point we should be able to retrive some fields of the
                 //new user recod but instead maybe becouse there is something wrong
                 // we are only getting the id of the new record
                 //on the rows object so we are goin to add the original user object to the response
                 user.id = rows[0];
                 user.password = req.body.password;
-                res.status(200).json(user);
+
+                res.status(200).json(rows);
             })
-            .catch(function (err) {
+            .catch(function(err) {
                 console.log('register User catch error', err)
-                //err.error='error creating user'
+                    //err.error='error creating user'
                 err.origin = 'users.route'
-                res.status(500).json({error: err})
+                res.status(500).json({
+                    error: err
+                })
             })
 
 
     },
-    updateUser: function (req, res, next) {
+    updateUser: function(req, res, next) {
         _that = this;
         console.log(req.body)
         var user = this.model.users._reqBodyAtr(req);
 
         this.model.users.updateUser(user)
-            .then(function (rows) {
+            .then(function(rows) {
                 res.status(200).json(user)
             })
-            .catch(function (err) {
+            .catch(function(err) {
                 //onsole.log('register User catch error',err)
                 res.status(500).json(err)
             })
@@ -176,32 +190,32 @@ module.exports = new Krouter({
 
     },
 
-    passwordSet: function (req, res, next) {
+    passwordSet: function(req, res, next) {
 
         var user = this.model.users._reqBodyAtr(this._emptyPasswordFix(req));
 
         this.model.users
             .updatePass(user)
-            .then(function (rows) {
+            .then(function(rows) {
                 user.password = req.body.password;
                 res.status(200).json(user);
             })
-            .catch(function (err) {
+            .catch(function(err) {
                 //onsole.log('register User catch error',err)
                 res.status(500).json(err)
             })
 
     },
-    selfUpdate: function (req, res, next) {
+    selfUpdate: function(req, res, next) {
         _that = this;
         console.log(req.body)
         var user = this.this.model.users._reqBodyAtr(req);
 
         this.model.users.selfUpdate(user)
-            .then(function (rows) {
+            .then(function(rows) {
                 res.status(200).json(user)
             })
-            .catch(function (err) {
+            .catch(function(err) {
                 //onsole.log('register User catch error',err)
                 res.status(500).json(err)
             })
@@ -216,7 +230,7 @@ module.exports = new Krouter({
 
 
     //update only validFields of user data
-    update: function (req, res, next) {
+    update: function(req, res, next) {
         var _that = this;
 
         var validFields = ['id', 'first_name', 'last_name', 'password_status_id']
@@ -224,19 +238,22 @@ module.exports = new Krouter({
 
         var dataToUpdate = _.pick(req.body, validFields)
         this.model.users.update(dataToUpdate)
-            .then(function (affected_rows) {
+            .then(function(affected_rows) {
 
                 if (affected_rows > 0) {
 
-                    _that._jsonResponse(res,200,'successful_user_update',dataToUpdate)
+                    _that._jsonResponse(res, 200, 'successful_user_update', dataToUpdate)
                 } else {
                     //not found
-                    _that._jsonResponse(res,400,'successful_user_update',dataToUpdate)
+                    _that._jsonResponse(res, 400, 'successful_user_update', dataToUpdate)
 
                 }
             })
-            .catch(function (err) {
-                _that._jsonResponse(res,500, 'model_error', {error:err,input:dataToUpdate})
+            .catch(function(err) {
+                _that._jsonResponse(res, 500, 'model_error', {
+                    error: err,
+                    input: dataToUpdate
+                })
             })
 
 
@@ -247,7 +264,7 @@ module.exports = new Krouter({
 
 
     //update only validFields of user data
-    put_user: function (id,req, res, next) {
+    put_user: function(id, req, res, next) {
         var _that = this;
 
         var validFields = ['id', 'first_name', 'last_name', 'password_status_id']
@@ -255,19 +272,22 @@ module.exports = new Krouter({
 
         var dataToUpdate = _.pick(req.body, validFields)
         this.model.users.update(dataToUpdate)
-            .then(function (affected_rows) {
+            .then(function(affected_rows) {
 
                 if (affected_rows > 0) {
 
-                    _that._jsonResponse(res,200,'successful_user_update',dataToUpdate)
+                    _that._jsonResponse(res, 200, 'successful_user_update', dataToUpdate)
                 } else {
                     //not found
-                    _that._jsonResponse(res,400,'successful_user_update',dataToUpdate)
+                    _that._jsonResponse(res, 400, 'successful_user_update', dataToUpdate)
 
                 }
             })
-            .catch(function (err) {
-                _that._jsonResponse(res,500, 'model_error', {error:err,input:dataToUpdate})
+            .catch(function(err) {
+                _that._jsonResponse(res, 500, 'model_error', {
+                    error: err,
+                    input: dataToUpdate
+                })
             })
 
 
@@ -281,62 +301,65 @@ module.exports = new Krouter({
 
 
     /*-----------Mandatory----------*/
-    setEndPoints: function () {
+    setEndPoints: function() {
         var _that = this
 
 
 
 
-/*
-        this.router.route('/user/:id')          //edit user
-            .put(function (req, res, next) {
-                _that.update(req, res, next)
-            })
-        this.router.route('/user/:id')          //edit user
-            .get(function (req, res, next) {
-                _that._jsonResponse(res,200,'bien',{})
-            })*/
+        /*
+                this.router.route('/user/:id')          //edit user
+                    .put(function (req, res, next) {
+                        _that.update(req, res, next)
+                    })
+                this.router.route('/user/:id')          //edit user
+                    .get(function (req, res, next) {
+                        _that._jsonResponse(res,200,'bien',{})
+                    })*/
 
         this.router.route('/users/:guess')
             //retrive a limited user list based on the guess
-            .get(function (req, res, next) {
+            .get(function(req, res, next) {
                 _that.model.users
                     .find(req.params.guess)
-                    .then(function (rows) {
+                    .then(function(rows) {
                         console.log(rows)
-                        this._successResponse(res,'succesfull_users_guess_fetch',rows);
+                        this._successResponse(res, 'succesfull_users_guess_fetch', rows);
                     })
-                    .catch(function (err) {
+                    .catch(function(err) {
                         res.status(500).json(err);
                         console.log(err)
-                        this._successResponse(res,'failed_users_guess_fetch',{error:err,});
+                        this._successResponse(res, 'failed_users_guess_fetch', {
+                            error: err,
+                        });
                     })
             });
 
         this.router.route('/me')
-            .put(function (req, res, next) {
+            .put(function(req, res, next) {
 
             })
 
-        this.router.route('/user')
+        /*this.router.route('/user')
             //adds a new user
-            .post(function (req, res, next) {
+            .post(function(req, res, next) {
                 next()
-                /*
-                 res.status(401).json({
-                 error: {
-                 origin: 'activeUserVerify.middleware',
-                 message: 'User on token is not active'
-                 }
-                 })*/
-            }, function (req, res, next) {
+                    /*
+                     res.status(401).json({
+                     error: {
+                     origin: 'activeUserVerify.middleware',
+                     message: 'User on token is not active'
+                     }
+                     })*/
+                     /*
+            }, function(req, res, next) {
                 _that.newUser(req, res, next);
-            })
+            })*/
 
 
         this.router.route('/user/passwordset/:id')
             //update an user pass
-            .put(function (req, res, next) {
+            .put(function(req, res, next) {
                 _that.passwordSet(req, res, next)
             });
 
@@ -361,5 +384,4 @@ module.exports = new Krouter({
     }
 
 
-})
-;
+});

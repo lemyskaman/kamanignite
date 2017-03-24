@@ -6,7 +6,9 @@ var Model = require('../core/kmodel');
 var Promise = require('bluebird');
 var bcrypt = Promise.promisifyAll(require('bcrypt'));
 var saltrounds = 10;
-const TEMP_PASS_STATUS = 'temp_pass';
+
+const NEW_USER_STATUS = 'waiting';
+const NEW_USER_PASS_STATUS =  'deactive'
 
 //each method should return a promise
 module.exports = new Model({
@@ -26,7 +28,16 @@ module.exports = new Model({
         'password_status.name': 'password_status_name'
     },
     //--Read Only ends
-    fields: ['id', 'username', 'password', 'first_name', 'last_name', 'status_id', 'temp_password', 'password_status_id'],
+    fields: [
+        'id',
+        'username',
+        'password',
+        'first_name',
+        'last_name',
+        'status_id',
+        'temp_password',
+        'password_status_id'
+    ],
 
 
     listLimit: 100,
@@ -81,8 +92,8 @@ module.exports = new Model({
     },
     //used to do authoritations so its the only one allowed to return pass hash DANGER NO TO BE USED TO RETURN DATA
     _getByUsername: function (username) {
-        var aliases=this.fieldsAliases;
-        aliases['user.password']='password'
+        var aliases = this.fieldsAliases;
+        aliases['user.password'] = 'password'
         return this.reader
             .select(this.rawFieldsAliases(aliases))
             .from('user')
@@ -103,7 +114,7 @@ module.exports = new Model({
                     user.temp_password = user.password;
                     user.password = pass;
                     user.status_id = NEW_USER_STATUS;
-                    user.password_status_id = TEMP_PASS_STATUS;
+                    user.password_status_id = NEW_USER_PASS_STATUS;
                     //next should return fields but is not doing it
                     //it only returns the new user id  iguess is something related to mysql
                     //more than knexjs
@@ -111,7 +122,7 @@ module.exports = new Model({
                 })
 
         } else {
-            return Promise.reject({code: 'missing_username_or_password'})
+            return Promise.reject({ code: 'missing_username_or_password' })
         }
     },
     update: function (user) {
@@ -135,12 +146,12 @@ module.exports = new Model({
 
                 return this.writer('user')
                     //update only user fields and avoid id field to be modify
-                    .update(user, _.omit(this.fields,['id']) )
+                    .update(user, _.omit(this.fields, ['id']))
                     .where('id', user.id)
             }
 
         } else {
-            return Promise.reject({error: 'user data id cant be null '})
+            return Promise.reject({ error: 'user data id cant be null ' })
         }
     },
 
@@ -164,7 +175,7 @@ module.exports = new Model({
         var valids = ['username', 'id'];
         //var checked_criteria = (valids.indexOf(criteria) > -1) ? criteria : valids[0];
         if (valids.indexOf(criteria) === -1) {
-            return Promise.reject({error: criteria + ' is not a valid field to get a user'})
+            return Promise.reject({ error: criteria + ' is not a valid field to get a user' })
         } else {
 
             return this.reader
