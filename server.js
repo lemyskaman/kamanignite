@@ -52,10 +52,10 @@ app.use( function(req, res, next) {
 });
 
 //icon
-app.use(favicon(__dirname + '/static/assets/favicon.png'));
+//app.use(favicon(__dirname + '/static/assets/favicon.png'));
 //all static files will be served from here
 // for production enviorment ngix is recomendable to do this job
-app.use('/static', express.static('static/'));
+//app.use('/static', express.static('static/'));
 
 
 
