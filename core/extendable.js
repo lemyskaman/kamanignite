@@ -4,24 +4,23 @@
 var _ = require("underscore");
 
 
-module.exports=function(opt){
-    this.kind=opt.kind;
-   // this.nature=opt.nature
-    //this.model
-    const self=this;
-    _.map(opt,function(element,key,list){
-        self[key]=element;
-    },self)
+module.exports = function (opt) {
+    if (this.initialize && typeof this.initialize === 'function')
+        this.initialize(opt);
+
+    return {
+        extend: function (opt) {
+            return _.extend({}, this, opt);
+        }
+    }
 };
 
 module.exports.prototype = {
 
-    extend: function(child) {
-        return _.extend({}, this, child);
+    initialize: function (opts) {
+
     },
-    run: function(req, res, next) {
-        console.log('base run');
-    }
+
 }
 
 

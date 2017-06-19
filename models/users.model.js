@@ -8,7 +8,7 @@ var bcrypt = Promise.promisifyAll(require('bcrypt'));
 var saltrounds = 10;
 
 const NEW_USER_STATUS = 'waiting';
-const NEW_USER_PASS_STATUS =  'deactive'
+const NEW_USER_PASS_STATUS = 'deactive'
 
 //each method should return a promise
 module.exports = new Model({
@@ -40,13 +40,30 @@ module.exports = new Model({
     ],
 
 
-    listLimit: 100,
 
 
     //new set
 
     //retrive a list with a portion of user fields which values match like the guess param
-    find: function (guess) {
+    //
+    find: function(guess) {
+
+        return this.search(this.reader
+            .select(this.rawFieldsAliases({
+                'user.id': 'id',
+                'user.username': 'username',
+                'user.first_name': 'first_name',
+                'user.last_name': 'last_name',
+                'user.status_id': 'status_id',
+                'status.name': 'status_name'
+            }))
+            .from('user')
+            .leftJoin('status', 'user.status_id', 'status.id')
+            .leftJoin(this.knex.raw('status as password_status'), 'user.password_status_id', 'password_status.id'),
+            guess, ['user.id', 'user.username', 'user.first_name', 'user.last_name', ]
+        ).limit(this.listLimit);
+    },
+    /*find: function (guess) {
 
         return this.reader
 
@@ -67,9 +84,9 @@ module.exports = new Model({
             .orWhere('user.last_name', 'like', '%' + guess + '%')
             .limit(this.listLimit)
 
-    },
+    },*/
     //retrives a full field list of users acording matched fields with
-    fullFind: function () {
+    fullFind: function() {
         return this.reader
             .select(this.rawFieldsAliases(this.fieldsAliases))
             .from('user')
@@ -81,7 +98,7 @@ module.exports = new Model({
             .orWhere('user.last_name', 'like', '%' + guess + '%')
             .limit(this.listLimit)
     },
-    _getById: function (id) {
+    _getById: function(id) {
         return this.reader
             .select(this.rawFieldsAliases(this.fieldsAliases))
             .from('user')
@@ -91,7 +108,8 @@ module.exports = new Model({
             .limit(1)
     },
     //used to do authoritations so its the only one allowed to return pass hash DANGER NO TO BE USED TO RETURN DATA
-    _getByUsername: function (username) {
+    _getByUsername: function(username) {
+
         var aliases = this.fieldsAliases;
         aliases['user.password'] = 'password'
         return this.reader
@@ -102,15 +120,15 @@ module.exports = new Model({
             .where('user.username', username)
             .limit(1)
     },
-    _hashPass: function (pass) {
+    _hashPass: function(pass) {
         return bcrypt.hashAsync(pass, saltrounds)
     },
-    add: function (user) {
+    add: function(user) {
         var _that = this;
 
         if (user.password && user.username) {
             return this._hashPass(user.password)
-                .then(function (pass) {
+                .then(function(pass) {
                     user.temp_password = user.password;
                     user.password = pass;
                     user.status_id = NEW_USER_STATUS;
@@ -122,10 +140,12 @@ module.exports = new Model({
                 })
 
         } else {
-            return Promise.reject({ code: 'missing_username_or_password' })
+            return Promise.reject({
+                code: 'missing_username_or_password'
+            })
         }
     },
-    update: function (user) {
+    update: function(user) {
         var _that = this;
         //to edit id  field of user is mandatory
         if (user.id) {
@@ -134,7 +154,7 @@ module.exports = new Model({
             if (user.password) {
 
                 return this._hashPass(user.password)
-                    .then(function (hashPass) {
+                    .then(function(hashPass) {
                         user.password = hashPass;
                         return _that.writer('user')
                             .update(user, _.keys(user))
@@ -151,7 +171,9 @@ module.exports = new Model({
             }
 
         } else {
-            return Promise.reject({ error: 'user data id cant be null ' })
+            return Promise.reject({
+                error: 'user data id cant be null '
+            })
         }
     },
 
@@ -163,19 +185,13 @@ module.exports = new Model({
 
 
 
-
-
-
-
-
-
-
-
-    getBy: function (criteria, key_value) {
+    getBy: function(criteria, key_value) {
         var valids = ['username', 'id'];
         //var checked_criteria = (valids.indexOf(criteria) > -1) ? criteria : valids[0];
         if (valids.indexOf(criteria) === -1) {
-            return Promise.reject({ error: criteria + ' is not a valid field to get a user' })
+            return Promise.reject({
+                error: criteria + ' is not a valid field to get a user'
+            })
         } else {
 
             return this.reader

@@ -40,12 +40,12 @@ var statusModel=require('./models/status.model.js')
 var routes = {};
 routes.index = require('./routes/index.route.js');
 routes.users = require('./routes/users.route.js');
+routes.example = require('./routes/example.route.js')
 routes.auth = require('./routes/atuh.route.js');
 
 
 app.use( function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
-  
   res.header('Access-Control-Allow-Headers', 'x-access-token, Content-Type, Authorization, Content-Length, X-Requested-With');
   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
  next();
@@ -64,7 +64,7 @@ app.use( function(req, res, next) {
 
 
 //a front end html/javascript magic will  delivered from here
-app.use('/resources',routes.index._getRouter());
+//app.use('/resources',routes.index._getRouter());
 
 
 //authentication its out side from verifyig middleware
@@ -79,7 +79,7 @@ app.use(function(req,res,next){
 
 
 app.use('/resources', routes.users._getRouter());
-
+app.use('/resources',routes.example._getRouter());
 
 
 

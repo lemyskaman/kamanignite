@@ -78,22 +78,20 @@ module.exports = new Krouter({
         this.model.users
             .find(guess)
             .then(function(rows) {
+                console.log('get_users')
+                //console.log(rows.length )
                 console.log(rows);
-
-
-                if (rows.lenght > 0) {
-                    _that._jsonResponse(res, 200, 'almost a user was found', rows)
+                if (rows.length > 0) {
+                    res.status(200).json(rows);
+                    //_that._jsonResponse(res, 200, 'almost a user was found', rows)
                 } else {
                     _that._jsonResponse(res, 404, 'no user found', rows)
                 }
-
-
             })
             .catch(function(err) {
                 console.log(err)
                 _that._jsonResponse(res, 505, '', err)
-       
-                
+
             })
     },
     getUsers: function(req, res, next) {
